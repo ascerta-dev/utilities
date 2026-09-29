@@ -9,13 +9,13 @@ The repo includes workflow fixtures for testing audit and migration behavior wit
 - `sample-workflow-all-providers.json`
   - compact mixed-provider fixture
 - `sample-workflow-enterprise-ingest.json`
-  - larger enterprise-style fixture with native + Pay-i nodes
+  - larger enterprise-style fixture with native + Ascerta nodes
 - `test-workflow-native-providers.json`
   - native provider-oriented test fixture
-- `test-workflow-payi-all-providers.json`
-  - Pay-i node fixture across providers
-- `test-workflow-payi-pipeline.json`
-  - pipeline/flow-oriented Pay-i fixture
+- `test-workflow-ascerta-all-providers.json`
+  - Ascerta node fixture across providers
+- `test-workflow-ascerta-pipeline.json`
+  - pipeline/flow-oriented Ascerta fixture
 
 ## Recommended Uses
 

@@ -2,11 +2,11 @@
 
 > **[Back to Documentation Index](./README.md)**
 
-This page documents current behavior of `audit-configure-payi-proxy.py` so operators can plan migrations with predictable outcomes.
+This page documents current behavior of `audit-configure-ascerta-proxy.py` so operators can plan migrations with predictable outcomes.
 
 ## Scope of Detection
 
-1. The audit tracks only node types explicitly mapped in the script (`NATIVE_NODE_TYPES` and `PAYI_NODE_TYPES`).
+1. The audit tracks only node types explicitly mapped in the script (`NATIVE_NODE_TYPES` and `ASCERTA_NODE_TYPES`).
 2. AI calls made through generic nodes (for example `HTTP Request`, `Code`, or custom internal nodes) are not automatically classified as provider usage by this script.
 3. Sub-workflow dependencies are not modeled as a graph:
    - each workflow in scope is scanned independently;
@@ -49,7 +49,7 @@ This page documents current behavior of `audit-configure-payi-proxy.py` so opera
 
 ### Azure OpenAI Services
 
-Azure OpenAI credential redirect is fully supported (the `endpoint` field is rewritten to the Pay-i proxy URL). Node replacement migration is also functional, with the following caveat:
+Azure OpenAI credential redirect is fully supported (the `endpoint` field is rewritten to the Ascerta proxy URL). Node replacement migration is also functional, with the following caveat:
 
 - Azure OpenAI embeddings nodes (`embeddingsAzureOpenAi`) are detected but cannot be migrated automatically. If your workflows use Azure OpenAI embeddings, those nodes require manual reconfiguration after migration.
 
@@ -57,9 +57,15 @@ Azure OpenAI credential redirect is fully supported (the `endpoint` field is rew
 
 Credential redirect is not supported for AWS Bedrock. The standard n8n `aws` credential type uses an IAM Access Key / Secret Key pair, which does not have a URL field that can be swapped to a proxy endpoint.
 
-- Use node replacement (the Pay-i Bedrock Chat Model node) instead of credential redirect.
-- Node replacement passthrough requires that the original Bedrock node already has an `aws` credential attached. If the credential is missing from the source node, the migrated Pay-i node will have no AWS credentials and must be configured manually.
+- Use node replacement (the Ascerta Bedrock Chat Model node) instead of credential redirect.
+- Node replacement passthrough requires that the original Bedrock node already has an `aws` credential attached. If the credential is missing from the source node, the migrated Ascerta node will have no AWS credentials and must be configured manually.
 - Bedrock embeddings nodes are detected but cannot be migrated automatically.
+
+### Databricks
+
+The Ascerta Databricks node requires an `ascertaDatabricksApi` credential. A native `databricks` credential is not compatible and is not copied to the replacement node. Provide an existing Ascerta Databricks credential or set `ASCERTA_DBX_PAT` and `ASCERTA_DBX_WORKSPACE_URL` so the migrator can create one.
+
+For custom serving endpoints, review **Deployed Model** in the migrated node before running the workflow. The toolkit cannot always determine this value from the source node.
 
 ---
 

@@ -1,8 +1,8 @@
-# Pay-i n8n Toolkit — Documentation
+# Ascerta n8n Toolkit — Documentation
 
-This documentation covers the Pay-i n8n migration and audit toolkit. It is written for platform operators, integration engineers, and compliance teams working with self-hosted n8n environments.
+This documentation covers the Ascerta n8n migration and audit toolkit. It is written for platform operators, integration engineers, and compliance teams working with self-hosted n8n environments.
 
-For the Pay-i n8n community node package itself, see [n8n-nodes-payi on GitHub](https://github.com/Pay-i/n8n-nodes-payi).
+For the Ascerta n8n community node package itself, see [@ascerta/n8n-nodes-ascerta on GitHub](https://github.com/ascerta-dev/n8n-nodes-ascerta).
 
 ---
 
@@ -29,13 +29,13 @@ If you are new to the toolkit, read the guides in this order:
 
 | Script | Purpose |
 |--------|---------|
-| `audit-configure-payi-proxy.py` | Workflow inventory, credential capability probing, JSON/Markdown report generation, optional credential patching |
-| `migrate-workflows-to-payi.py` | Interactive migration with strategy selection: credential redirect, node replacement, or both |
-| `migrate-to-payi.sh` | Bulk credential redirect for OpenAI, Anthropic, and Azure OpenAI |
-| `migrate-openai-to-payi.sh` | OpenAI-only credential redirect |
+| `audit-configure-ascerta-proxy.py` | Workflow inventory, credential capability probing, JSON/Markdown report generation, optional credential patching |
+| `migrate-workflows-to-ascerta.py` | Interactive migration with strategy selection: credential redirect, node replacement, or both |
+| `migrate-to-ascerta.sh` | Bulk credential redirect for OpenAI, Anthropic, and Azure OpenAI |
+| `migrate-openai-to-ascerta.sh` | OpenAI-only credential redirect |
 
 ## Intended Audience
 
 - **Platform admins** running self-hosted n8n instances
-- **Integration engineers** migrating workflows to route through Pay-i
+- **Integration engineers** migrating workflows to route through Ascerta
 - **Security and compliance teams** reviewing migration artifacts and audit reports
