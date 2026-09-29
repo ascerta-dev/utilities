@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i Multi-Provider Test",
+  "name": "Ascerta Multi-Provider Test",
   "nodes": [
     {
       "parameters": {},
@@ -8,7 +8,7 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
       "position": [200, 400],
-      "webhookId": "payi-test-chat"
+      "webhookId": "ascerta-test-chat"
     },
     {
       "parameters": {
@@ -32,14 +32,14 @@
         "options": {}
       },
       "id": "model-openai",
-      "name": "Pay-i OpenAI",
-      "type": "n8n-nodes-payi.lmChatPayi",
+      "name": "Ascerta OpenAI",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
       "typeVersion": 1,
       "position": [400, 400],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -69,14 +69,14 @@
         }
       },
       "id": "model-anthropic",
-      "name": "Pay-i Anthropic",
-      "type": "n8n-nodes-payi.lmChatPayiAnthropic",
+      "name": "Ascerta Anthropic",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic",
       "typeVersion": 1,
       "position": [400, 800],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -106,14 +106,14 @@
         }
       },
       "id": "model-azure",
-      "name": "Pay-i Azure OpenAI",
-      "type": "n8n-nodes-payi.lmChatPayiAzure",
+      "name": "Ascerta Azure OpenAI",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure",
       "typeVersion": 1,
       "position": [400, 1200],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -144,14 +144,14 @@
         }
       },
       "id": "model-bedrock",
-      "name": "Pay-i Bedrock",
-      "type": "n8n-nodes-payi.lmChatPayiBedrock",
+      "name": "Ascerta Bedrock",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock",
       "typeVersion": 1,
       "position": [400, 1600],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -199,28 +199,28 @@
         ]
       ]
     },
-    "Pay-i OpenAI": {
+    "Ascerta OpenAI": {
       "ai_languageModel": [
         [
           { "node": "AI Agent (OpenAI)", "type": "ai_languageModel", "index": 0 }
         ]
       ]
     },
-    "Pay-i Anthropic": {
+    "Ascerta Anthropic": {
       "ai_languageModel": [
         [
           { "node": "AI Agent (Anthropic)", "type": "ai_languageModel", "index": 0 }
         ]
       ]
     },
-    "Pay-i Azure OpenAI": {
+    "Ascerta Azure OpenAI": {
       "ai_languageModel": [
         [
           { "node": "AI Agent (Azure)", "type": "ai_languageModel", "index": 0 }
         ]
       ]
     },
-    "Pay-i Bedrock": {
+    "Ascerta Bedrock": {
       "ai_languageModel": [
         [
           { "node": "AI Agent (Bedrock)", "type": "ai_languageModel", "index": 0 }

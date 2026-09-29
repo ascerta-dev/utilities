@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
-# migrate-to-payi.sh
+# migrate-to-ascerta.sh
 #
-# Redirects existing n8n LLM credentials to route through Pay-i proxy.
+# Redirects existing n8n LLM credentials to route through Ascerta proxy.
 # Uses the n8n REST API — works on both self-hosted and cloud instances.
 #
 # Supported credential types:
@@ -17,9 +17,9 @@
 # Usage:
 #   export N8N_BASE_URL=http://localhost:5678
 #   export N8N_API_KEY=your-n8n-api-key
-#   export PAYI_BASE_URL=https://api.yourcompany.pay-i.com
-#   export PAYI_API_KEY=your-payi-api-key
-#   ./migrate-to-payi.sh
+#   export ASCERTA_BASE_URL=https://api.yourcompany.ascerta.com
+#   export ASCERTA_API_KEY=your-ascerta-api-key
+#   ./migrate-to-ascerta.sh
 #
 # To revert, re-run with original provider URLs or edit credentials in the n8n UI.
 #
@@ -28,38 +28,38 @@ set -euo pipefail
 
 # ── Check required env vars ──────────────────────────────────────────────────
 
-for VAR in N8N_BASE_URL N8N_API_KEY PAYI_BASE_URL PAYI_API_KEY; do
+for VAR in N8N_BASE_URL N8N_API_KEY ASCERTA_BASE_URL ASCERTA_API_KEY; do
   if [[ -z "${!VAR:-}" ]]; then
     echo "ERROR: ${VAR} is not set"
     echo ""
     echo "Required environment variables:"
     echo "  N8N_BASE_URL   - Your n8n instance (e.g. http://localhost:5678)"
     echo "  N8N_API_KEY    - n8n API key (Settings > API > Create API Key)"
-    echo "  PAYI_BASE_URL  - Pay-i instance (e.g. https://api.yourcompany.pay-i.com)"
-    echo "  PAYI_API_KEY   - Your Pay-i API key"
+    echo "  ASCERTA_BASE_URL  - Ascerta instance (e.g. https://api.yourcompany.ascerta.com)"
+    echo "  ASCERTA_API_KEY   - Your Ascerta API key"
     exit 1
   fi
 done
 
-if [[ ! "${PAYI_BASE_URL}" =~ ^https:// ]]; then
-  echo "ERROR: PAYI_BASE_URL must start with https://"
+if [[ ! "${ASCERTA_BASE_URL}" =~ ^https:// ]]; then
+  echo "ERROR: ASCERTA_BASE_URL must start with https://"
   exit 1
 fi
 
-PAYI_BASE_URL="${PAYI_BASE_URL%/}"
+ASCERTA_BASE_URL="${ASCERTA_BASE_URL%/}"
 N8N_BASE_URL="${N8N_BASE_URL%/}"
 
 echo "══════════════════════════════════════════════════════════════"
-echo "  Pay-i Migration Script for n8n LLM Credentials"
+echo "  Ascerta Migration Script for n8n LLM Credentials"
 echo "══════════════════════════════════════════════════════════════"
 echo ""
 echo "  n8n instance:  ${N8N_BASE_URL}"
-echo "  Pay-i base:    ${PAYI_BASE_URL}"
+echo "  Ascerta base:    ${ASCERTA_BASE_URL}"
 echo ""
 echo "  Provider proxy URLs:"
-echo "    OpenAI:       ${PAYI_BASE_URL}/api/v1/proxy/openai/v1"
-echo "    Anthropic:    ${PAYI_BASE_URL}/api/v1/proxy/anthropic"
-echo "    Azure OpenAI: ${PAYI_BASE_URL}/api/v1/proxy/azure.openai"
+echo "    OpenAI:       ${ASCERTA_BASE_URL}/api/v1/proxy/openai/v1"
+echo "    Anthropic:    ${ASCERTA_BASE_URL}/api/v1/proxy/anthropic"
+echo "    Azure OpenAI: ${ASCERTA_BASE_URL}/api/v1/proxy/azure.openai"
 echo ""
 echo "  NOTE: n8n requires the full credential data on update."
 echo "  You will be prompted for each credential's provider API key."
@@ -97,7 +97,7 @@ TOTAL=$(echo "$RESULTS" | python3 -c "import json,sys; print(len(json.load(sys.s
 if [[ "$TOTAL" == "0" ]]; then
   echo "No OpenAI, Anthropic, or Azure OpenAI credentials found."
   echo ""
-  echo "For AWS Bedrock, use the Pay-i Proxy node (n8n-nodes-payi) instead."
+  echo "For AWS Bedrock, use the Ascerta Proxy node (@ascerta/n8n-nodes-ascerta) instead."
   exit 0
 fi
 
@@ -136,7 +136,7 @@ for c in creds:
 
   case "${CRED_TYPE}" in
     openAiApi)
-      PROXY_URL="${PAYI_BASE_URL}/api/v1/proxy/openai/v1"
+      PROXY_URL="${ASCERTA_BASE_URL}/api/v1/proxy/openai/v1"
       LABEL="OpenAI"
 
       echo "─── [${CRED_ID}] ${CRED_NAME} (${LABEL}) ───"
@@ -163,7 +163,7 @@ print(json.dumps({'data': {
       ;;
 
     anthropicApi)
-      PROXY_URL="${PAYI_BASE_URL}/api/v1/proxy/anthropic"
+      PROXY_URL="${ASCERTA_BASE_URL}/api/v1/proxy/anthropic"
       LABEL="Anthropic"
 
       echo "─── [${CRED_ID}] ${CRED_NAME} (${LABEL}) ───"
@@ -184,13 +184,13 @@ print(json.dumps({'data': {
     'apiKey': '''${PROVIDER_KEY}''',
     'url': '${PROXY_URL}',
     'headerName': 'xProxy-api-key',
-    'headerValue': '${PAYI_API_KEY}'
+    'headerValue': '${ASCERTA_API_KEY}'
 }}))
 " 2>/dev/null)
       ;;
 
     azureOpenAiApi)
-      PROXY_URL="${PAYI_BASE_URL}/api/v1/proxy/azure.openai"
+      PROXY_URL="${ASCERTA_BASE_URL}/api/v1/proxy/azure.openai"
       LABEL="Azure OpenAI"
 
       echo "─── [${CRED_ID}] ${CRED_NAME} (${LABEL}) ───"
@@ -255,8 +255,8 @@ echo "Notes:"
 echo "  - Anthropic credentials include the xProxy-api-key header automatically."
 echo ""
 echo "  - OpenAI and Azure OpenAI credentials do NOT have a custom header field."
-echo "    For these providers, the Pay-i API key must be injected at the"
-echo "    network/infrastructure level, or use the Pay-i Proxy node instead."
+echo "    For these providers, the Ascerta API key must be injected at the"
+echo "    network/infrastructure level, or use the Ascerta Proxy node instead."
 echo ""
 echo "To revert:"
 echo "  OpenAI:       Set base URL back to https://api.openai.com/v1"
@@ -264,5 +264,5 @@ echo "  Anthropic:    Set base URL back to https://api.anthropic.com"
 echo "                and remove the xProxy-api-key header"
 echo "  Azure OpenAI: Set endpoint back to your original Azure endpoint"
 echo ""
-echo "For AWS Bedrock, use the Pay-i Proxy node — n8n's Bedrock"
+echo "For AWS Bedrock, use the Ascerta Proxy node — n8n's Bedrock"
 echo "credentials do not support base URL overrides."

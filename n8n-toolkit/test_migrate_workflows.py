@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Tests for migrate-workflows-to-payi.py
+Tests for migrate-workflows-to-ascerta.py
 
 Run:  python3 -m pytest test_migrate_workflows.py -v
   or: python3 test_migrate_workflows.py
@@ -17,21 +17,21 @@ from unittest.mock import MagicMock, patch
 
 # ── Import the migration script as a module ──────────────────────────────────
 
-SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "migrate-workflows-to-payi.py")
+SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "migrate-workflows-to-ascerta.py")
 spec = importlib.util.spec_from_file_location("migrate", SCRIPT_PATH)
 migrate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(migrate)
 
 # ── Import the audit script as a module ──────────────────────────────────────
 
-AUDIT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "audit-configure-payi-proxy.py")
-audit_spec = importlib.util.spec_from_file_location("audit_payi", AUDIT_SCRIPT_PATH)
-audit_payi = importlib.util.module_from_spec(audit_spec)
-audit_spec.loader.exec_module(audit_payi)
+AUDIT_SCRIPT_PATH = os.path.join(os.path.dirname(__file__), "audit-configure-ascerta-proxy.py")
+audit_spec = importlib.util.spec_from_file_location("audit_ascerta", AUDIT_SCRIPT_PATH)
+audit_ascerta = importlib.util.module_from_spec(audit_spec)
+audit_spec.loader.exec_module(audit_ascerta)
 
 # ── Test Fixtures ────────────────────────────────────────────────────────────
 
-PAYI_CRED = {"id": "cred-123", "name": "Pay-i API"}
+ASCERTA_CRED = {"id": "cred-123", "name": "Ascerta API"}
 
 OPENAI_CHAT_MODEL_NODE = {
     "id": "node-aaa",
@@ -241,28 +241,28 @@ class TestFindLlmNodes(unittest.TestCase):
         self.assertNotIn("databricks_shim", plain_found)  # only set when shim
 
 
-# ── Tests: build_payi_chat_model_node ────────────────────────────────────────
+# ── Tests: build_ascerta_chat_model_node ────────────────────────────────────────
 
-class TestBuildPayiChatModelNode(unittest.TestCase):
+class TestBuildAscertaChatModelNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test-key", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test-key", "Ascerta Chat Model"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayi")
-        self.assertEqual(result["name"], "Pay-i Chat Model")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscerta")
+        self.assertEqual(result["name"], "Ascerta Chat Model")
         self.assertEqual(result["id"], "node-aaa")
         self.assertEqual(result["position"], [400, 300])
         self.assertEqual(result["typeVersion"], 1)
 
     def test_model_mapped(self):
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
         self.assertEqual(result["parameters"]["model"], "gpt-4.1-mini")
 
     def test_options_preserved(self):
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
         opts = result["parameters"]["options"]
         self.assertEqual(opts["temperature"], 0.5)
@@ -272,36 +272,36 @@ class TestBuildPayiChatModelNode(unittest.TestCase):
     def test_unsupported_options_excluded(self):
         node = copy.deepcopy(OPENAI_CHAT_MODEL_NODE)
         node["parameters"]["options"]["unknownOption"] = "foo"
-        result = migrate.build_payi_chat_model_node(node, PAYI_CRED, "sk-test", "Pay-i Chat Model")
+        result = migrate.build_ascerta_chat_model_node(node, ASCERTA_CRED, "sk-test", "Ascerta Chat Model")
         self.assertNotIn("unknownOption", result["parameters"]["options"])
 
     def test_no_plaintext_provider_key(self):
         """providerApiKey should NOT be in parameters — credentials are passed through."""
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-my-key", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-my-key", "Ascerta Chat Model"
         )
         self.assertNotIn("providerApiKey", result["parameters"])
 
     def test_native_credential_passthrough(self):
-        """The original node's openAiApi credential should be passed to the Pay-i node."""
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        """The original node's openAiApi credential should be passed to the Ascerta node."""
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
         self.assertIn("openAiApi", result["credentials"])
         self.assertEqual(result["credentials"]["openAiApi"]["id"], "old-cred")
         self.assertEqual(result["credentials"]["openAiApi"]["name"], "OpenAI")
 
     def test_credentials_reference(self):
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
-        cred_ref = result["credentials"]["payiApi"]
+        cred_ref = result["credentials"]["ascertaApi"]
         self.assertEqual(cred_ref["id"], "cred-123")
-        self.assertEqual(cred_ref["name"], "Pay-i API")
+        self.assertEqual(cred_ref["name"], "Ascerta API")
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
         params = result["parameters"]
         self.assertEqual(params["useCaseName"], "={{ $workflow.name.replaceAll(' ', '-') }}")
@@ -310,20 +310,20 @@ class TestBuildPayiChatModelNode(unittest.TestCase):
 
     def test_default_model_when_missing(self):
         node = {"id": "x", "parameters": {}, "position": [0, 0]}
-        result = migrate.build_payi_chat_model_node(node, PAYI_CRED, "sk-test", "Pay-i Chat Model")
+        result = migrate.build_ascerta_chat_model_node(node, ASCERTA_CRED, "sk-test", "Ascerta Chat Model")
         self.assertEqual(result["parameters"]["model"], "gpt-4o")
 
     def test_empty_options_when_none_in_source(self):
         node = {"id": "x", "parameters": {"model": "gpt-4o"}, "position": [0, 0]}
-        result = migrate.build_payi_chat_model_node(node, PAYI_CRED, "sk-test", "Pay-i Chat Model")
+        result = migrate.build_ascerta_chat_model_node(node, ASCERTA_CRED, "sk-test", "Ascerta Chat Model")
         self.assertEqual(result["parameters"]["options"], {})
 
     def test_credential_id_stringified(self):
-        cred = {"id": 42, "name": "Pay-i API"}
-        result = migrate.build_payi_chat_model_node(
-            OPENAI_CHAT_MODEL_NODE, cred, "sk-test", "Pay-i Chat Model"
+        cred = {"id": 42, "name": "Ascerta API"}
+        result = migrate.build_ascerta_chat_model_node(
+            OPENAI_CHAT_MODEL_NODE, cred, "sk-test", "Ascerta Chat Model"
         )
-        self.assertEqual(result["credentials"]["payiApi"]["id"], "42")
+        self.assertEqual(result["credentials"]["ascertaApi"]["id"], "42")
 
     def test_model_from_resource_locator_object(self):
         """n8n 2.x stores model as resourceLocator: {mode, value}."""
@@ -335,32 +335,32 @@ class TestBuildPayiChatModelNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_chat_model_node(node, PAYI_CRED, "sk-test", "Pay-i Chat Model")
+        result = migrate.build_ascerta_chat_model_node(node, ASCERTA_CRED, "sk-test", "Ascerta Chat Model")
         self.assertEqual(result["parameters"]["model"], "gpt-4.1-mini")
 
 
-# ── Tests: build_payi_proxy_node ─────────────────────────────────────────────
+# ── Tests: build_ascerta_proxy_node ─────────────────────────────────────────────
 
-class TestBuildPayiProxyNode(unittest.TestCase):
+class TestBuildAscertaProxyNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_proxy_node(
-            OPENAI_APP_NODE, PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            OPENAI_APP_NODE, ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.payi")
-        self.assertEqual(result["name"], "Pay-i Proxy")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.ascerta")
+        self.assertEqual(result["name"], "Ascerta Proxy")
         self.assertEqual(result["id"], "node-bbb")
         self.assertEqual(result["position"], [600, 200])
 
     def test_model_mapped(self):
-        result = migrate.build_payi_proxy_node(
-            OPENAI_APP_NODE, PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            OPENAI_APP_NODE, ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
         self.assertEqual(result["parameters"]["model"], "gpt-4o")
         self.assertEqual(result["parameters"]["provider"], "openai")
 
     def test_messages_json_string_preserved(self):
-        result = migrate.build_payi_proxy_node(
-            OPENAI_APP_NODE, PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            OPENAI_APP_NODE, ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(len(msgs), 1)
@@ -370,7 +370,7 @@ class TestBuildPayiProxyNode(unittest.TestCase):
     def test_messages_from_plain_prompt_string(self):
         node = copy.deepcopy(OPENAI_APP_NODE)
         node["parameters"] = {"model": "gpt-4o", "prompt": "Hello world"}
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(msgs[0]["content"], "Hello world")
 
@@ -380,7 +380,7 @@ class TestBuildPayiProxyNode(unittest.TestCase):
             {"role": "system", "content": "You are helpful"},
             {"role": "user", "content": "Hi"},
         ]
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(len(msgs), 2)
         self.assertEqual(msgs[0]["role"], "system")
@@ -392,7 +392,7 @@ class TestBuildPayiProxyNode(unittest.TestCase):
                 {"role": "user", "content": "What is 2+2?"},
             ]
         }
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0]["content"], "What is 2+2?")
@@ -400,27 +400,27 @@ class TestBuildPayiProxyNode(unittest.TestCase):
     def test_messages_empty_dict_values(self):
         node = copy.deepcopy(OPENAI_APP_NODE)
         node["parameters"]["messages"] = {"values": []}
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(msgs[0]["content"], "Hello!")
 
     def test_messages_fallback_default(self):
         node = {"id": "x", "parameters": {"model": "gpt-4o"}, "position": [0, 0]}
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(msgs[0]["content"], "Hello!")
 
     def test_output_defaults(self):
-        result = migrate.build_payi_proxy_node(
-            OPENAI_APP_NODE, PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            OPENAI_APP_NODE, ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
         self.assertTrue(result["parameters"]["includeCostData"])
         self.assertFalse(result["parameters"]["returnFullResponse"])
         self.assertFalse(result["parameters"]["debugLogging"])
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_proxy_node(
-            OPENAI_APP_NODE, PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            OPENAI_APP_NODE, ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
         self.assertEqual(result["parameters"]["useCaseName"], "={{ $workflow.name.replaceAll(' ', '-') }}")
         self.assertEqual(result["parameters"]["useCaseId"], "={{ 'openai/' + $parameter.model + '/' + $execution.id }}")
@@ -436,27 +436,27 @@ class TestBuildPayiProxyNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_proxy_node(node, PAYI_CRED, "sk-test", "Pay-i Proxy")
+        result = migrate.build_ascerta_proxy_node(node, ASCERTA_CRED, "sk-test", "Ascerta Proxy")
         self.assertEqual(result["parameters"]["model"], "gpt-4o")
 
 
-# ── Tests: build_payi_chat_model_anthropic_node ──────────────────────────────
+# ── Tests: build_ascerta_chat_model_anthropic_node ──────────────────────────────
 
-class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
+class TestBuildAscertaChatModelAnthropicNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE_V12, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model"
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE_V12, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model"
         )
         self.assertEqual(result["id"], "node-ccc")
-        self.assertEqual(result["name"], "Pay-i Anthropic Chat Model")
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayiAnthropic")
+        self.assertEqual(result["name"], "Ascerta Anthropic Chat Model")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic")
         self.assertEqual(result["typeVersion"], 1)
         self.assertEqual(result["position"], [400, 500])
 
     def test_model_extraction(self):
         """Default model when none specified should be empty string."""
         node = {"id": "x", "parameters": {}, "position": [0, 0]}
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         self.assertEqual(result["parameters"]["model"], "")
 
     def test_model_from_resource_locator(self):
@@ -469,7 +469,7 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         self.assertEqual(result["parameters"]["model"], "claude-sonnet-4-20250514")
 
     def test_options_mapping(self):
@@ -487,7 +487,7 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         opts = result["parameters"]["options"]
         self.assertEqual(opts["maxTokensToSample"], 4096)
         self.assertEqual(opts["temperature"], 0.8)
@@ -507,7 +507,7 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         opts = result["parameters"]["options"]
         self.assertTrue(opts["thinking"])
         self.assertEqual(opts["thinkingBudget"], 10000)
@@ -515,22 +515,22 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
     def test_empty_options(self):
         """When source has no options, result has empty options dict."""
         node = {"id": "x", "parameters": {"model": "claude-sonnet-4-20250514"}, "position": [0, 0]}
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         self.assertEqual(result["parameters"]["options"], {})
 
     def test_credential_reference(self):
-        """payiApi credential is set correctly."""
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE_V12, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model"
+        """ascertaApi credential is set correctly."""
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE_V12, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model"
         )
-        cred_ref = result["credentials"]["payiApi"]
+        cred_ref = result["credentials"]["ascertaApi"]
         self.assertEqual(cred_ref["id"], "cred-123")
-        self.assertEqual(cred_ref["name"], "Pay-i API")
+        self.assertEqual(cred_ref["name"], "Ascerta API")
 
     def test_tracking_defaults(self):
         """useCaseName and useCaseId expressions are set."""
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE_V12, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model"
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE_V12, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model"
         )
         params = result["parameters"]
         self.assertEqual(params["useCaseName"], "={{ $workflow.name.replaceAll(' ', '-') }}")
@@ -539,22 +539,22 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
 
     def test_no_plaintext_provider_key(self):
         """providerApiKey should NOT be in parameters — credentials are passed through."""
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE_V12, PAYI_CRED, "sk-ant-my-key", "Pay-i Anthropic Chat Model"
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE_V12, ASCERTA_CRED, "sk-ant-my-key", "Ascerta Anthropic Chat Model"
         )
         self.assertNotIn("providerApiKey", result["parameters"])
 
     def test_credential_id_stringified(self):
-        cred = {"id": 99, "name": "Pay-i API"}
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE_V12, cred, "sk-ant-test", "Pay-i Anthropic Chat Model"
+        cred = {"id": 99, "name": "Ascerta API"}
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE_V12, cred, "sk-ant-test", "Ascerta Anthropic Chat Model"
         )
-        self.assertEqual(result["credentials"]["payiApi"]["id"], "99")
+        self.assertEqual(result["credentials"]["ascertaApi"]["id"], "99")
 
     def test_model_string_preserved(self):
         """Model specified as a plain string is preserved."""
-        result = migrate.build_payi_chat_model_anthropic_node(
-            ANTHROPIC_CHAT_MODEL_NODE, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model"
+        result = migrate.build_ascerta_chat_model_anthropic_node(
+            ANTHROPIC_CHAT_MODEL_NODE, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model"
         )
         self.assertEqual(result["parameters"]["model"], "claude-sonnet-4-20250514")
 
@@ -572,7 +572,7 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
             },
             "position": [0, 0],
         }
-        result = migrate.build_payi_chat_model_anthropic_node(node, PAYI_CRED, "sk-ant-test", "Pay-i Anthropic Chat Model")
+        result = migrate.build_ascerta_chat_model_anthropic_node(node, ASCERTA_CRED, "sk-ant-test", "Ascerta Anthropic Chat Model")
         opts = result["parameters"]["options"]
         self.assertIn("temperature", opts)
         self.assertNotIn("unknownOption", opts)
@@ -584,21 +584,21 @@ class TestBuildPayiChatModelAnthropicNode(unittest.TestCase):
 class TestUniqueNodeName(unittest.TestCase):
     def test_no_collision(self):
         self.assertEqual(
-            migrate.unique_node_name("Pay-i Chat Model", {"Trigger", "Agent"}),
-            "Pay-i Chat Model",
+            migrate.unique_node_name("Ascerta Chat Model", {"Trigger", "Agent"}),
+            "Ascerta Chat Model",
         )
 
     def test_collision_adds_suffix(self):
         self.assertEqual(
-            migrate.unique_node_name("Pay-i Chat Model", {"Pay-i Chat Model", "Agent"}),
-            "Pay-i Chat Model 1",
+            migrate.unique_node_name("Ascerta Chat Model", {"Ascerta Chat Model", "Agent"}),
+            "Ascerta Chat Model 1",
         )
 
     def test_multiple_collisions(self):
-        existing = {"Pay-i Chat Model", "Pay-i Chat Model 1", "Pay-i Chat Model 2"}
+        existing = {"Ascerta Chat Model", "Ascerta Chat Model 1", "Ascerta Chat Model 2"}
         self.assertEqual(
-            migrate.unique_node_name("Pay-i Chat Model", existing),
-            "Pay-i Chat Model 3",
+            migrate.unique_node_name("Ascerta Chat Model", existing),
+            "Ascerta Chat Model 3",
         )
 
     def test_empty_set(self):
@@ -614,8 +614,8 @@ class TestRewireConnections(unittest.TestCase):
                 "ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Pay-i Chat Model")
-        self.assertIn("Pay-i Chat Model", result)
+        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Ascerta Chat Model")
+        self.assertIn("Ascerta Chat Model", result)
         self.assertNotIn("OpenAI Chat Model", result)
 
     def test_renames_target_reference(self):
@@ -624,9 +624,9 @@ class TestRewireConnections(unittest.TestCase):
                 "main": [[{"node": "OpenAI Chat Model", "type": "main", "index": 0}]]
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Pay-i Chat Model")
+        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Ascerta Chat Model")
         target = result["Trigger"]["main"][0][0]
-        self.assertEqual(target["node"], "Pay-i Chat Model")
+        self.assertEqual(target["node"], "Ascerta Chat Model")
 
     def test_renames_both_source_and_target(self):
         connections = {
@@ -637,10 +637,10 @@ class TestRewireConnections(unittest.TestCase):
                 "main": [[{"node": "OpenAI Chat Model", "type": "main", "index": 0}]]
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Pay-i Chat Model")
-        self.assertIn("Pay-i Chat Model", result)
+        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Ascerta Chat Model")
+        self.assertIn("Ascerta Chat Model", result)
         self.assertNotIn("OpenAI Chat Model", result)
-        self.assertEqual(result["Trigger"]["main"][0][0]["node"], "Pay-i Chat Model")
+        self.assertEqual(result["Trigger"]["main"][0][0]["node"], "Ascerta Chat Model")
 
     def test_no_change_when_names_equal(self):
         connections = {"Foo": {"main": [[{"node": "Bar", "type": "main", "index": 0}]]}}
@@ -656,9 +656,9 @@ class TestRewireConnections(unittest.TestCase):
                 ]]
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI", "Pay-i Proxy")
+        result = migrate.rewire_connections(connections, "OpenAI", "Ascerta Proxy")
         slot = result["Trigger"]["main"][0]
-        self.assertEqual(slot[0]["node"], "Pay-i Proxy")
+        self.assertEqual(slot[0]["node"], "Ascerta Proxy")
         self.assertEqual(slot[1]["node"], "Logger")  # untouched
 
     def test_empty_connections(self):
@@ -672,9 +672,9 @@ class TestRewireConnections(unittest.TestCase):
                 "main": [[{"node": "Output", "type": "main", "index": 0}]],
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Pay-i Chat Model")
-        self.assertIn("ai_languageModel", result["Pay-i Chat Model"])
-        self.assertIn("main", result["Pay-i Chat Model"])
+        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Ascerta Chat Model")
+        self.assertIn("ai_languageModel", result["Ascerta Chat Model"])
+        self.assertIn("main", result["Ascerta Chat Model"])
 
     def test_multiple_slots(self):
         connections = {
@@ -685,8 +685,8 @@ class TestRewireConnections(unittest.TestCase):
                 ]
             },
         }
-        result = migrate.rewire_connections(connections, "OpenAI", "Pay-i Proxy")
-        self.assertEqual(result["Router"]["main"][0][0]["node"], "Pay-i Proxy")
+        result = migrate.rewire_connections(connections, "OpenAI", "Ascerta Proxy")
+        self.assertEqual(result["Router"]["main"][0][0]["node"], "Ascerta Proxy")
         self.assertEqual(result["Router"]["main"][1][0]["node"], "Logger")
 
 
@@ -695,20 +695,20 @@ class TestRewireConnections(unittest.TestCase):
 class TestFixExpressionReferences(unittest.TestCase):
     def test_replaces_single_quote_reference(self):
         nodes = [{"parameters": {"text": "={{ $('OpenAI Chat Model').item.json.output }}"}}]
-        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Pay-i Chat Model")
+        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Ascerta Chat Model")
         self.assertEqual(count, 1)
-        self.assertIn("Pay-i Chat Model", nodes[0]["parameters"]["text"])
+        self.assertIn("Ascerta Chat Model", nodes[0]["parameters"]["text"])
         self.assertNotIn("OpenAI Chat Model", nodes[0]["parameters"]["text"])
 
     def test_replaces_double_quote_reference(self):
         nodes = [{"parameters": {"text": '={{ $("OpenAI Chat Model").item.json }}'}}]
-        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Pay-i Chat Model")
+        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Ascerta Chat Model")
         self.assertEqual(count, 1)
-        self.assertIn("Pay-i Chat Model", nodes[0]["parameters"]["text"])
+        self.assertIn("Ascerta Chat Model", nodes[0]["parameters"]["text"])
 
     def test_no_change_when_no_references(self):
         nodes = [{"parameters": {"text": "hello world"}}]
-        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Pay-i Chat Model")
+        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Ascerta Chat Model")
         self.assertEqual(count, 0)
         self.assertEqual(nodes[0]["parameters"]["text"], "hello world")
 
@@ -829,20 +829,20 @@ class TestRedactDict(unittest.TestCase):
         self.assertEqual(result["data"]["url"], "https://x.com")
 
 
-# ── Tests: ensure_payi_credential ────────────────────────────────────────────
+# ── Tests: ensure_ascerta_credential ────────────────────────────────────────────
 
-class TestEnsurePayiCredential(unittest.TestCase):
+class TestEnsureAscertaCredential(unittest.TestCase):
     def test_finds_existing_credential(self):
         client = MagicMock()
         client.get.return_value = {
             "data": [
                 {"id": "c-1", "name": "OpenAI", "type": "openAiApi"},
-                {"id": "c-2", "name": "Pay-i API", "type": "payiApi"},
+                {"id": "c-2", "name": "Ascerta API", "type": "ascertaApi"},
             ]
         }
-        result = migrate.ensure_payi_credential(client, "pk-test", "https://api.pay-i.com")
+        result = migrate.ensure_ascerta_credential(client, "pk-test", "https://api.ascerta.com")
         self.assertEqual(result["id"], "c-2")
-        self.assertEqual(result["name"], "Pay-i API")
+        self.assertEqual(result["name"], "Ascerta API")
         client.post.assert_not_called()
 
     def test_creates_credential_when_missing(self):
@@ -852,20 +852,20 @@ class TestEnsurePayiCredential(unittest.TestCase):
                 {"id": "c-1", "name": "OpenAI", "type": "openAiApi"},
             ]
         }
-        client.post.return_value = {"id": "c-new", "name": "Pay-i API", "type": "payiApi"}
-        result = migrate.ensure_payi_credential(client, "pk-test", "https://api.pay-i.com")
+        client.post.return_value = {"id": "c-new", "name": "Ascerta API", "type": "ascertaApi"}
+        result = migrate.ensure_ascerta_credential(client, "pk-test", "https://api.ascerta.com")
         self.assertEqual(result["id"], "c-new")
         client.post.assert_called_once()
         call_body = client.post.call_args[0][1]
-        self.assertEqual(call_body["type"], "payiApi")
+        self.assertEqual(call_body["type"], "ascertaApi")
         self.assertEqual(call_body["data"]["apiKey"], "pk-test")
-        self.assertEqual(call_body["data"]["baseUrl"], "https://api.pay-i.com")
+        self.assertEqual(call_body["data"]["baseUrl"], "https://api.ascerta.com")
 
     def test_handles_empty_credentials_list(self):
         client = MagicMock()
         client.get.return_value = {"data": []}
         client.post.return_value = {"id": "c-new"}
-        result = migrate.ensure_payi_credential(client, "pk-test", "https://api.pay-i.com")
+        result = migrate.ensure_ascerta_credential(client, "pk-test", "https://api.ascerta.com")
         self.assertEqual(result["id"], "c-new")
         client.post.assert_called_once()
 
@@ -924,8 +924,8 @@ class TestMainDryRun(unittest.TestCase):
         return {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
         }
 
     def test_dry_run_detects_and_reports(self):
@@ -999,13 +999,13 @@ class TestMainFullMigration(unittest.TestCase):
         return {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
             "OPENAI_API_KEY": "sk-from-env",
         }
 
     def test_full_migration_chat_model(self):
-        """End-to-end: OpenAI Chat Model -> Pay-i Chat Model with auto-yes."""
+        """End-to-end: OpenAI Chat Model -> Ascerta Chat Model with auto-yes."""
         workflow = make_workflow(
             "wf-1", "Test Bot",
             nodes=[TRIGGER_NODE, copy.deepcopy(OPENAI_CHAT_MODEL_NODE), copy.deepcopy(AGENT_NODE)],
@@ -1024,7 +1024,7 @@ class TestMainFullMigration(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-1":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
                 return {}
@@ -1042,11 +1042,11 @@ class TestMainFullMigration(unittest.TestCase):
 
         # Verify the node was replaced
         node_types = [n["type"] for n in put_body["nodes"]]
-        self.assertIn("n8n-nodes-payi.lmChatPayi", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscerta", node_types)
         self.assertNotIn("@n8n/n8n-nodes-langchain.lmChatOpenAi", node_types)
 
         # Verify connections were rewired
-        self.assertIn("Pay-i Chat Model", put_body["connections"])
+        self.assertIn("Ascerta Chat Model", put_body["connections"])
         self.assertNotIn("OpenAI Chat Model", put_body["connections"])
 
         # Verify read-only fields stripped
@@ -1055,7 +1055,7 @@ class TestMainFullMigration(unittest.TestCase):
         self.assertNotIn("createdAt", put_body)
 
     def test_full_migration_proxy_node(self):
-        """End-to-end: OpenAI app node -> Pay-i Proxy with auto-yes."""
+        """End-to-end: OpenAI app node -> Ascerta Proxy with auto-yes."""
         workflow = make_workflow(
             "wf-2", "Data Pipeline",
             nodes=[TRIGGER_NODE, copy.deepcopy(OPENAI_APP_NODE)],
@@ -1074,7 +1074,7 @@ class TestMainFullMigration(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-2":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
                 return {}
@@ -1090,15 +1090,15 @@ class TestMainFullMigration(unittest.TestCase):
         put_body = put_calls[0]["body"]
 
         node_types = [n["type"] for n in put_body["nodes"]]
-        self.assertIn("n8n-nodes-payi.payi", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.ascerta", node_types)
         self.assertNotIn("@n8n/n8n-nodes-langchain.openai", node_types)
 
         # Verify connection target was renamed
         trigger_conns = put_body["connections"]["Manual Trigger"]["main"][0]
-        self.assertEqual(trigger_conns[0]["node"], "Pay-i Proxy")
+        self.assertEqual(trigger_conns[0]["node"], "Ascerta Proxy")
 
     def test_full_migration_anthropic_chat_model(self):
-        """End-to-end: Anthropic Chat Model -> Pay-i Anthropic Chat Model with auto-yes."""
+        """End-to-end: Anthropic Chat Model -> Ascerta Anthropic Chat Model with auto-yes."""
         anthropic_node = copy.deepcopy(ANTHROPIC_CHAT_MODEL_NODE_V12)
         agent = copy.deepcopy(AGENT_NODE)
         agent["parameters"]["text"] = "={{ $('Anthropic Chat Model').item.json.output }}"
@@ -1120,7 +1120,7 @@ class TestMainFullMigration(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-3":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
                 return {}
@@ -1137,20 +1137,20 @@ class TestMainFullMigration(unittest.TestCase):
         self.assertEqual(len(put_calls), 1)
         put_body = put_calls[0]["body"]
 
-        # Verify the node was replaced with Anthropic Pay-i type
+        # Verify the node was replaced with Anthropic Ascerta type
         node_types = [n["type"] for n in put_body["nodes"]]
-        self.assertIn("n8n-nodes-payi.lmChatPayiAnthropic", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic", node_types)
         self.assertNotIn("@n8n/n8n-nodes-langchain.lmChatAnthropic", node_types)
 
         # Verify connections were rewired
-        self.assertIn("Pay-i Anthropic Chat Model", put_body["connections"])
+        self.assertIn("Ascerta Anthropic Chat Model", put_body["connections"])
         self.assertNotIn("Anthropic Chat Model", put_body["connections"])
 
         # Verify expression references were updated
         agent_node = next(n for n in put_body["nodes"] if n["name"] == "AI Agent")
-        self.assertIn("Pay-i Anthropic Chat Model", agent_node["parameters"]["text"])
+        self.assertIn("Ascerta Anthropic Chat Model", agent_node["parameters"]["text"])
         # The old bare name should not appear — check by ensuring the only occurrence
-        # of "Anthropic Chat Model" is prefixed with "Pay-i "
+        # of "Anthropic Chat Model" is prefixed with "Ascerta "
         self.assertNotIn("$('Anthropic Chat Model')", agent_node["parameters"]["text"])
 
         # Verify read-only fields stripped
@@ -1178,7 +1178,7 @@ class TestMainFullMigration(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-1":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
                 return {}
@@ -1194,11 +1194,11 @@ class TestMainFullMigration(unittest.TestCase):
 
         # Find the agent node and check its expression was updated
         agent_node = next(n for n in put_body["nodes"] if n["name"] == "AI Agent")
-        self.assertIn("Pay-i Chat Model", agent_node["parameters"]["text"])
+        self.assertIn("Ascerta Chat Model", agent_node["parameters"]["text"])
         self.assertNotIn("OpenAI Chat Model", agent_node["parameters"]["text"])
 
     def test_creates_credential_when_missing(self):
-        """Verify credential creation when no payiApi exists."""
+        """Verify credential creation when no ascertaApi exists."""
         workflow = make_workflow(
             "wf-1", "Test",
             nodes=[TRIGGER_NODE, copy.deepcopy(OPENAI_CHAT_MODEL_NODE)],
@@ -1215,7 +1215,7 @@ class TestMainFullMigration(unittest.TestCase):
                 return {"data": []}  # No credentials
             if method == "POST" and path == "/api/v1/credentials":
                 post_calls.append(body)
-                return {"id": "c-new", "name": "Pay-i API"}
+                return {"id": "c-new", "name": "Ascerta API"}
             if method == "PUT":
                 return {}
             return {}
@@ -1227,7 +1227,7 @@ class TestMainFullMigration(unittest.TestCase):
 
         self.assertEqual(rc, 0)
         self.assertEqual(len(post_calls), 1)
-        self.assertEqual(post_calls[0]["type"], "payiApi")
+        self.assertEqual(post_calls[0]["type"], "ascertaApi")
 
     def test_workflow_filter_flag(self):
         """Verify --workflow ID only fetches that one workflow."""
@@ -1245,7 +1245,7 @@ class TestMainFullMigration(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-99":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 return {}
             return {}
@@ -1290,18 +1290,18 @@ class TestN8nApiClient(unittest.TestCase):
 
 class TestEdgeCases(unittest.TestCase):
     def test_name_collision_during_migration(self):
-        """If 'Pay-i Chat Model' already exists, suffix should be added."""
-        existing_payi_node = {
+        """If 'Ascerta Chat Model' already exists, suffix should be added."""
+        existing_ascerta_node = {
             "id": "node-existing",
-            "name": "Pay-i Chat Model",
-            "type": "n8n-nodes-payi.lmChatPayi",
+            "name": "Ascerta Chat Model",
+            "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
             "typeVersion": 1,
             "position": [200, 200],
             "parameters": {},
         }
         workflow = make_workflow(
             "wf-1", "Collision Test",
-            nodes=[TRIGGER_NODE, existing_payi_node, copy.deepcopy(OPENAI_CHAT_MODEL_NODE)],
+            nodes=[TRIGGER_NODE, existing_ascerta_node, copy.deepcopy(OPENAI_CHAT_MODEL_NODE)],
             connections={},
         )
 
@@ -1313,7 +1313,7 @@ class TestEdgeCases(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-1":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append(body)
                 return {}
@@ -1322,8 +1322,8 @@ class TestEdgeCases(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
             "OPENAI_API_KEY": "sk-test",
         }
         with patch.dict(os.environ, env, clear=False):
@@ -1334,8 +1334,8 @@ class TestEdgeCases(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(len(put_calls), 1)
         names = [n["name"] for n in put_calls[0]["nodes"]]
-        self.assertIn("Pay-i Chat Model", names)       # existing
-        self.assertIn("Pay-i Chat Model 1", names)     # new with suffix
+        self.assertIn("Ascerta Chat Model", names)       # existing
+        self.assertIn("Ascerta Chat Model 1", names)     # new with suffix
 
     def test_multiple_openai_nodes_same_workflow(self):
         """Two OpenAI chat models in one workflow get distinct names."""
@@ -1358,7 +1358,7 @@ class TestEdgeCases(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-1":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append(body)
                 return {}
@@ -1367,8 +1367,8 @@ class TestEdgeCases(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
             "OPENAI_API_KEY": "sk-test",
         }
         with patch.dict(os.environ, env, clear=False):
@@ -1380,9 +1380,9 @@ class TestEdgeCases(unittest.TestCase):
         self.assertEqual(len(put_calls), 1)
         names = [n["name"] for n in put_calls[0]["nodes"]]
         # Both should be migrated with unique names
-        payi_names = [n for n in names if n.startswith("Pay-i Chat Model")]
-        self.assertEqual(len(payi_names), 2)
-        self.assertEqual(len(set(payi_names)), 2)  # all unique
+        ascerta_names = [n for n in names if n.startswith("Ascerta Chat Model")]
+        self.assertEqual(len(ascerta_names), 2)
+        self.assertEqual(len(set(ascerta_names)), 2)  # all unique
 
 
 # ── Tests: prompt_select_nodes ────────────────────────────────────────────────
@@ -1404,7 +1404,7 @@ class TestPromptSelectNodes(unittest.TestCase):
                 "node": {"name": "Azure OpenAI Chat Model"}, "node_type": "x",
                 "provider": "azureOpenai", "replacement": None,
                 "feasible": False, "label": "Azure OpenAI Chat Model (LangChain)",
-                "skip_reason": "Pay-i Chat Model currently supports OpenAI-compatible providers only",
+                "skip_reason": "Ascerta Chat Model currently supports OpenAI-compatible providers only",
             },
             {
                 "workflow_id": "wf-2", "workflow_name": "Pipeline",
@@ -1544,11 +1544,11 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         self.assertEqual(anthropic_node["replacement"], "chat_model_anthropic")
 
     def test_chat_model_migration_preserves_model(self):
-        """Build a Pay-i Chat Model from the sample's OpenAI Chat Model node."""
+        """Build a Ascerta Chat Model from the sample's OpenAI Chat Model node."""
         found = migrate.find_llm_nodes([self.workflow])
         chat_info = next(n for n in found if n["node"]["name"] == "OpenAI Chat Model")
-        result = migrate.build_payi_chat_model_node(
-            chat_info["node"], PAYI_CRED, "sk-test", "Pay-i Chat Model"
+        result = migrate.build_ascerta_chat_model_node(
+            chat_info["node"], ASCERTA_CRED, "sk-test", "Ascerta Chat Model"
         )
         self.assertEqual(result["parameters"]["model"], "gpt-4.1-mini")
         self.assertEqual(result["parameters"]["options"]["temperature"], 0.7)
@@ -1556,11 +1556,11 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         self.assertEqual(result["parameters"]["options"]["topP"], 0.95)
 
     def test_proxy_migration_preserves_messages(self):
-        """Build a Pay-i Proxy from the sample's OpenAI app node."""
+        """Build a Ascerta Proxy from the sample's OpenAI app node."""
         found = migrate.find_llm_nodes([self.workflow])
         app_info = next(n for n in found if n["node"]["name"] == "OpenAI")
-        result = migrate.build_payi_proxy_node(
-            app_info["node"], PAYI_CRED, "sk-test", "Pay-i Proxy"
+        result = migrate.build_ascerta_proxy_node(
+            app_info["node"], ASCERTA_CRED, "sk-test", "Ascerta Proxy"
         )
         msgs = json.loads(result["parameters"]["messages"])
         self.assertEqual(len(msgs), 2)
@@ -1568,33 +1568,33 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         self.assertEqual(msgs[1]["role"], "user")
 
     def test_connection_rewiring_after_chat_model_rename(self):
-        """Rewire connections when OpenAI Chat Model -> Pay-i Chat Model."""
+        """Rewire connections when OpenAI Chat Model -> Ascerta Chat Model."""
         connections = copy.deepcopy(self.workflow["connections"])
-        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Pay-i Chat Model")
-        self.assertIn("Pay-i Chat Model", result)
+        result = migrate.rewire_connections(connections, "OpenAI Chat Model", "Ascerta Chat Model")
+        self.assertIn("Ascerta Chat Model", result)
         self.assertNotIn("OpenAI Chat Model", result)
         # Target should still point to AI Agent
-        target = result["Pay-i Chat Model"]["ai_languageModel"][0][0]
+        target = result["Ascerta Chat Model"]["ai_languageModel"][0][0]
         self.assertEqual(target["node"], "AI Agent")
 
     def test_connection_rewiring_after_proxy_rename(self):
-        """Rewire connections when OpenAI -> Pay-i Proxy."""
+        """Rewire connections when OpenAI -> Ascerta Proxy."""
         connections = copy.deepcopy(self.workflow["connections"])
-        result = migrate.rewire_connections(connections, "OpenAI", "Pay-i Proxy")
-        # "Manual Trigger" should now point to "Pay-i Proxy"
+        result = migrate.rewire_connections(connections, "OpenAI", "Ascerta Proxy")
+        # "Manual Trigger" should now point to "Ascerta Proxy"
         trigger_target = result["Manual Trigger"]["main"][0][0]
-        self.assertEqual(trigger_target["node"], "Pay-i Proxy")
+        self.assertEqual(trigger_target["node"], "Ascerta Proxy")
         # Source key should be renamed
-        self.assertIn("Pay-i Proxy", result)
+        self.assertIn("Ascerta Proxy", result)
         self.assertNotIn("OpenAI", result)
 
     def test_expression_references_in_agent_node(self):
         """Agent node has $('OpenAI Chat Model') and $('Anthropic Chat Model') references."""
         nodes = copy.deepcopy(self.workflow["nodes"])
-        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Pay-i Chat Model")
+        count = migrate.fix_expression_references(nodes, "OpenAI Chat Model", "Ascerta Chat Model")
         self.assertGreaterEqual(count, 1)
         agent = next(n for n in nodes if n["name"] == "AI Agent")
-        self.assertIn("Pay-i Chat Model", agent["parameters"]["text"])
+        self.assertIn("Ascerta Chat Model", agent["parameters"]["text"])
         # Anthropic ref should be untouched
         self.assertIn("Anthropic Chat Model", agent["parameters"]["fallback"])
 
@@ -1604,8 +1604,8 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
         }
         with patch.dict(os.environ, env, clear=False):
             with patch("sys.argv", ["migrate", "--dry-run", "--auto-yes"]):
@@ -1628,7 +1628,7 @@ class TestSampleWorkflowFixture(unittest.TestCase):
             if method == "GET" and path == "/api/v1/workflows/wf-sample":
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
-                return {"data": [{"id": "c-1", "name": "Pay-i API", "type": "payiApi"}]}
+                return {"data": [{"id": "c-1", "name": "Ascerta API", "type": "ascertaApi"}]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
                 return {}
@@ -1637,8 +1637,8 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
             "OPENAI_API_KEY": "sk-test",
             "ANTHROPIC_API_KEY": "sk-ant-test",
             "AZURE_OPENAI_API_KEY": "az-test",
@@ -1656,12 +1656,12 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         put_body = put_calls[0]["body"]
         node_types = {n["type"] for n in put_body["nodes"]}
 
-        # All five Pay-i node types should be present
-        self.assertIn("n8n-nodes-payi.lmChatPayi", node_types)
-        self.assertIn("n8n-nodes-payi.payi", node_types)
-        self.assertIn("n8n-nodes-payi.lmChatPayiAnthropic", node_types)
-        self.assertIn("n8n-nodes-payi.lmChatPayiAzure", node_types)
-        self.assertIn("n8n-nodes-payi.lmChatPayiBedrock", node_types)
+        # All five Ascerta node types should be present
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscerta", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.ascerta", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock", node_types)
 
         # All original native nodes should be gone
         self.assertNotIn("@n8n/n8n-nodes-langchain.lmChatOpenAi", node_types)
@@ -1673,11 +1673,11 @@ class TestSampleWorkflowFixture(unittest.TestCase):
         # Connections should be rewired
         self.assertNotIn("OpenAI Chat Model", put_body["connections"])
         self.assertNotIn("OpenAI", put_body["connections"])
-        self.assertIn("Pay-i Chat Model", put_body["connections"])
-        self.assertIn("Pay-i Proxy", put_body["connections"])
+        self.assertIn("Ascerta Chat Model", put_body["connections"])
+        self.assertIn("Ascerta Proxy", put_body["connections"])
 
 
-# ── Tests: build_payi_chat_model_azure_node ──────────────────────────────────
+# ── Tests: build_ascerta_chat_model_azure_node ──────────────────────────────────
 
 AZURE_CHAT_MODEL_NODE = {
     "id": "azure-1",
@@ -1693,28 +1693,28 @@ AZURE_CHAT_MODEL_NODE = {
 }
 
 
-class TestBuildPayiChatModelAzureNode(unittest.TestCase):
+class TestBuildAscertaChatModelAzureNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_chat_model_azure_node(
-            AZURE_CHAT_MODEL_NODE, PAYI_CRED, "az-key-test", "Pay-i Azure OpenAI Chat Model"
+        result = migrate.build_ascerta_chat_model_azure_node(
+            AZURE_CHAT_MODEL_NODE, ASCERTA_CRED, "az-key-test", "Ascerta Azure OpenAI Chat Model"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayiAzure")
-        self.assertEqual(result["name"], "Pay-i Azure OpenAI Chat Model")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure")
+        self.assertEqual(result["name"], "Ascerta Azure OpenAI Chat Model")
         self.assertEqual(result["parameters"]["deploymentName"], "gpt-4o")
         self.assertEqual(result["parameters"]["apiVersion"], "2024-06-01")
         self.assertNotIn("providerApiKey", result["parameters"])
 
     def test_options_preserved(self):
-        result = migrate.build_payi_chat_model_azure_node(
-            AZURE_CHAT_MODEL_NODE, PAYI_CRED, "az-key", "Test"
+        result = migrate.build_ascerta_chat_model_azure_node(
+            AZURE_CHAT_MODEL_NODE, ASCERTA_CRED, "az-key", "Test"
         )
         opts = result["parameters"]["options"]
         self.assertEqual(opts["temperature"], 0.5)
         self.assertEqual(opts["maxTokens"], 2048)
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_chat_model_azure_node(
-            AZURE_CHAT_MODEL_NODE, PAYI_CRED, "az-key", "Test"
+        result = migrate.build_ascerta_chat_model_azure_node(
+            AZURE_CHAT_MODEL_NODE, ASCERTA_CRED, "az-key", "Test"
         )
         self.assertEqual(result["parameters"]["useCaseName"], "={{ $workflow.name.replaceAll(' ', '-') }}")
         self.assertEqual(result["parameters"]["useCaseId"], "={{ 'azure/' + $parameter.deploymentName + '/' + $execution.id }}")
@@ -1722,15 +1722,15 @@ class TestBuildPayiChatModelAzureNode(unittest.TestCase):
 
     def test_no_plaintext_provider_key(self):
         """providerApiKey should NOT be in parameters — credentials are passed through."""
-        result = migrate.build_payi_chat_model_azure_node(
-            AZURE_CHAT_MODEL_NODE, PAYI_CRED, "az-dict-key", "Test"
+        result = migrate.build_ascerta_chat_model_azure_node(
+            AZURE_CHAT_MODEL_NODE, ASCERTA_CRED, "az-dict-key", "Test"
         )
         self.assertNotIn("providerApiKey", result["parameters"])
 
     def test_resource_locator_model(self):
         node = copy.deepcopy(AZURE_CHAT_MODEL_NODE)
         node["parameters"]["model"] = {"mode": "list", "value": "gpt-4-turbo"}
-        result = migrate.build_payi_chat_model_azure_node(node, PAYI_CRED, "k", "Test")
+        result = migrate.build_ascerta_chat_model_azure_node(node, ASCERTA_CRED, "k", "Test")
         self.assertEqual(result["parameters"]["deploymentName"], "gpt-4-turbo")
 
     def test_timeout_and_max_retries_preserved(self):
@@ -1738,13 +1738,13 @@ class TestBuildPayiChatModelAzureNode(unittest.TestCase):
         node = copy.deepcopy(AZURE_CHAT_MODEL_NODE)
         node["parameters"]["options"]["timeout"] = 30000
         node["parameters"]["options"]["maxRetries"] = 3
-        result = migrate.build_payi_chat_model_azure_node(node, PAYI_CRED, "k", "Test")
+        result = migrate.build_ascerta_chat_model_azure_node(node, ASCERTA_CRED, "k", "Test")
         opts = result["parameters"]["options"]
         self.assertEqual(opts["timeout"], 30000)
         self.assertEqual(opts["maxRetries"], 3)
 
 
-# ── Tests: build_payi_chat_model_bedrock_node ────────────────────────────────
+# ── Tests: build_ascerta_chat_model_bedrock_node ────────────────────────────────
 
 BEDROCK_CHAT_MODEL_NODE = {
     "id": "bedrock-1",
@@ -1759,12 +1759,12 @@ BEDROCK_CHAT_MODEL_NODE = {
 }
 
 
-class TestBuildPayiChatModelBedrockNode(unittest.TestCase):
+class TestBuildAscertaChatModelBedrockNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_chat_model_bedrock_node(
-            BEDROCK_CHAT_MODEL_NODE, PAYI_CRED, "", "Pay-i Bedrock Chat Model"
+        result = migrate.build_ascerta_chat_model_bedrock_node(
+            BEDROCK_CHAT_MODEL_NODE, ASCERTA_CRED, "", "Ascerta Bedrock Chat Model"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayiBedrock")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock")
         self.assertEqual(result["parameters"]["model"], "anthropic.claude-3-sonnet-20240229-v1:0")
         self.assertEqual(result["parameters"]["region"], "us-east-1")
         # No plaintext AWS credentials in parameters — they come from the aws credential
@@ -1772,8 +1772,8 @@ class TestBuildPayiChatModelBedrockNode(unittest.TestCase):
         self.assertNotIn("awsSecretAccessKey", result["parameters"])
 
     def test_options_preserved(self):
-        result = migrate.build_payi_chat_model_bedrock_node(
-            BEDROCK_CHAT_MODEL_NODE, PAYI_CRED, "", "Test"
+        result = migrate.build_ascerta_chat_model_bedrock_node(
+            BEDROCK_CHAT_MODEL_NODE, ASCERTA_CRED, "", "Test"
         )
         self.assertEqual(result["parameters"]["options"]["temperature"], 0.7)
         self.assertEqual(result["parameters"]["options"]["maxTokens"], 4096)
@@ -1782,14 +1782,14 @@ class TestBuildPayiChatModelBedrockNode(unittest.TestCase):
         """AWS credential from original node should be passed through."""
         node = copy.deepcopy(BEDROCK_CHAT_MODEL_NODE)
         node["credentials"] = {"aws": {"id": "aws-cred-1", "name": "AWS account"}}
-        result = migrate.build_payi_chat_model_bedrock_node(
-            node, PAYI_CRED, "", "Test"
+        result = migrate.build_ascerta_chat_model_bedrock_node(
+            node, ASCERTA_CRED, "", "Test"
         )
         self.assertIn("aws", result["credentials"])
         self.assertEqual(result["credentials"]["aws"]["id"], "aws-cred-1")
 
 
-# ── Tests: build_payi_proxy_anthropic_node ───────────────────────────────────
+# ── Tests: build_ascerta_proxy_anthropic_node ───────────────────────────────────
 
 ANTHROPIC_APP_NODE = {
     "id": "anth-app-1",
@@ -1804,20 +1804,20 @@ ANTHROPIC_APP_NODE = {
 }
 
 
-class TestBuildPayiProxyAnthropicNode(unittest.TestCase):
+class TestBuildAscertaProxyAnthropicNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_proxy_anthropic_node(
-            ANTHROPIC_APP_NODE, PAYI_CRED, "sk-ant-test", "Pay-i Proxy (Anthropic)"
+        result = migrate.build_ascerta_proxy_anthropic_node(
+            ANTHROPIC_APP_NODE, ASCERTA_CRED, "sk-ant-test", "Ascerta Proxy (Anthropic)"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.payi")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.ascerta")
         self.assertEqual(result["parameters"]["provider"], "anthropic")
         self.assertEqual(result["parameters"]["model"], "claude-sonnet-4-20250514")
         # providerApiKey is still used in proxy nodes (they don't use dual credentials yet)
         self.assertEqual(result["parameters"]["providerApiKey"], "sk-ant-test")
 
     def test_messages_from_text(self):
-        result = migrate.build_payi_proxy_anthropic_node(
-            ANTHROPIC_APP_NODE, PAYI_CRED, "k", "Test"
+        result = migrate.build_ascerta_proxy_anthropic_node(
+            ANTHROPIC_APP_NODE, ASCERTA_CRED, "k", "Test"
         )
         import json
         messages = json.loads(result["parameters"]["messages"])
@@ -1826,8 +1826,8 @@ class TestBuildPayiProxyAnthropicNode(unittest.TestCase):
         self.assertIn("Analyze this document", messages[0]["content"])
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_proxy_anthropic_node(
-            ANTHROPIC_APP_NODE, PAYI_CRED, "k", "Test"
+        result = migrate.build_ascerta_proxy_anthropic_node(
+            ANTHROPIC_APP_NODE, ASCERTA_CRED, "k", "Test"
         )
         self.assertEqual(result["parameters"]["useCaseName"], "={{ $workflow.name.replaceAll(' ', '-') }}")
         self.assertEqual(result["parameters"]["useCaseId"], "={{ 'anthropic/' + $parameter.model + '/' + $execution.id }}")
@@ -1838,57 +1838,57 @@ class TestBuildPayiProxyAnthropicNode(unittest.TestCase):
 
 class TestCredentialRedirect(unittest.TestCase):
     def test_openai_redirect_patch(self):
-        patch = migrate.build_credential_patch("openAiApi", "https://api.pay-i.com", "pk-test")
-        self.assertEqual(patch["data"]["url"], "https://api.pay-i.com/api/v1/proxy/openai/v1")
-        # All providers now include Pay-i key as custom header
+        patch = migrate.build_credential_patch("openAiApi", "https://api.ascerta.com", "pk-test")
+        self.assertEqual(patch["data"]["url"], "https://api.ascerta.com/api/v1/proxy/openai/v1")
+        # All providers now include Ascerta key as custom header
         self.assertEqual(patch["data"]["headerName"], "xProxy-api-key")
         self.assertEqual(patch["data"]["headerValue"], "pk-test")
 
     def test_openai_redirect_merges_existing_data(self):
         existing = {"apiKey": "sk-existing-key", "url": "", "headerName": "", "headerValue": ""}
-        patch = migrate.build_credential_patch("openAiApi", "https://api.pay-i.com", "pk-test",
+        patch = migrate.build_credential_patch("openAiApi", "https://api.ascerta.com", "pk-test",
                                                existing_data=existing)
-        self.assertEqual(patch["data"]["url"], "https://api.pay-i.com/api/v1/proxy/openai/v1")
+        self.assertEqual(patch["data"]["url"], "https://api.ascerta.com/api/v1/proxy/openai/v1")
         self.assertEqual(patch["data"]["apiKey"], "sk-existing-key")
         self.assertEqual(patch["data"]["headerName"], "xProxy-api-key")
         self.assertEqual(patch["data"]["headerValue"], "pk-test")
 
     def test_anthropic_redirect_patch(self):
-        patch = migrate.build_credential_patch("anthropicApi", "https://api.pay-i.com", "pk-test")
-        self.assertEqual(patch["data"]["url"], "https://api.pay-i.com/api/v1/proxy/anthropic")
+        patch = migrate.build_credential_patch("anthropicApi", "https://api.ascerta.com", "pk-test")
+        self.assertEqual(patch["data"]["url"], "https://api.ascerta.com/api/v1/proxy/anthropic")
         self.assertEqual(patch["data"]["headerName"], "xProxy-api-key")
         self.assertEqual(patch["data"]["headerValue"], "pk-test")
 
     def test_anthropic_redirect_merges_existing_data(self):
         existing = {"apiKey": "sk-anth-key", "url": ""}
-        patch = migrate.build_credential_patch("anthropicApi", "https://api.pay-i.com", "pk-test",
+        patch = migrate.build_credential_patch("anthropicApi", "https://api.ascerta.com", "pk-test",
                                                existing_data=existing)
-        self.assertEqual(patch["data"]["url"], "https://api.pay-i.com/api/v1/proxy/anthropic")
+        self.assertEqual(patch["data"]["url"], "https://api.ascerta.com/api/v1/proxy/anthropic")
         self.assertEqual(patch["data"]["apiKey"], "sk-anth-key")
         self.assertEqual(patch["data"]["headerName"], "xProxy-api-key")
 
     def test_azure_redirect_patch(self):
-        patch = migrate.build_credential_patch("azureOpenAiApi", "https://api.pay-i.com", "pk-test")
-        self.assertEqual(patch["data"]["endpoint"], "https://api.pay-i.com/api/v1/proxy/azure.openai")
+        patch = migrate.build_credential_patch("azureOpenAiApi", "https://api.ascerta.com", "pk-test")
+        self.assertEqual(patch["data"]["endpoint"], "https://api.ascerta.com/api/v1/proxy/azure.openai")
         self.assertEqual(patch["data"]["headerName"], "xProxy-api-key")
         self.assertEqual(patch["data"]["headerValue"], "pk-test")
 
     def test_azure_redirect_merges_existing_data(self):
         existing = {"apiKey": "az-key", "resourceName": "my-resource", "apiVersion": "2024-08-01-preview", "endpoint": ""}
-        patch = migrate.build_credential_patch("azureOpenAiApi", "https://api.pay-i.com", "pk-test",
+        patch = migrate.build_credential_patch("azureOpenAiApi", "https://api.ascerta.com", "pk-test",
                                                existing_data=existing)
-        self.assertEqual(patch["data"]["endpoint"], "https://api.pay-i.com/api/v1/proxy/azure.openai")
+        self.assertEqual(patch["data"]["endpoint"], "https://api.ascerta.com/api/v1/proxy/azure.openai")
         self.assertEqual(patch["data"]["apiKey"], "az-key")
         self.assertEqual(patch["data"]["resourceName"], "my-resource")
         self.assertEqual(patch["data"]["apiVersion"], "2024-08-01-preview")
 
     def test_unsupported_type_returns_empty(self):
-        patch = migrate.build_credential_patch("unknownApi", "https://api.pay-i.com", "pk-test")
+        patch = migrate.build_credential_patch("unknownApi", "https://api.ascerta.com", "pk-test")
         self.assertEqual(patch, {})
 
     def test_trailing_slash_stripped(self):
-        patch = migrate.build_credential_patch("openAiApi", "https://api.pay-i.com/", "pk-test")
-        self.assertEqual(patch["data"]["url"], "https://api.pay-i.com/api/v1/proxy/openai/v1")
+        patch = migrate.build_credential_patch("openAiApi", "https://api.ascerta.com/", "pk-test")
+        self.assertEqual(patch["data"]["url"], "https://api.ascerta.com/api/v1/proxy/openai/v1")
 
 
 # ── Tests: new node type detection ───────────────────────────────────────────
@@ -2015,33 +2015,33 @@ class TestDatabricksDetection(unittest.TestCase):
         self.assertTrue(all(n["replacement"] == "chat_model_databricks" for n in found))
 
 
-class TestBuildPayiChatModelDatabricksCommunityNode(unittest.TestCase):
+class TestBuildAscertaChatModelDatabricksCommunityNode(unittest.TestCase):
     def test_basic_fields(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test-token", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test-token", "Ascerta Databricks Chat Model"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayiDatabricks")
-        self.assertEqual(result["name"], "Pay-i Databricks Chat Model")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks")
+        self.assertEqual(result["name"], "Ascerta Databricks Chat Model")
         self.assertEqual(result["id"], "node-dbx")
         self.assertEqual(result["position"], [500, 400])
         self.assertEqual(result["typeVersion"], 1)
 
     def test_endpoint_extracted(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
-        self.assertEqual(result["parameters"]["endpointName"], "my-llm-endpoint")
+        self.assertEqual(result["parameters"]["endpointName"], {"mode": "name", "value": "my-llm-endpoint"})
 
     def test_endpoint_from_model_field(self):
         """When the community node uses 'model' instead of 'endpoint'."""
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_AI_AGENT_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_AI_AGENT_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
-        self.assertEqual(result["parameters"]["endpointName"], "databricks-meta-llama-3-3-70b-instruct")
+        self.assertEqual(result["parameters"]["endpointName"], {"mode": "name", "value": "databricks-meta-llama-3-3-70b-instruct"})
 
     def test_options_preserved(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
         opts = result["parameters"]["options"]
         self.assertEqual(opts["temperature"], 0.8)
@@ -2051,43 +2051,59 @@ class TestBuildPayiChatModelDatabricksCommunityNode(unittest.TestCase):
     def test_unsupported_options_excluded(self):
         node = copy.deepcopy(DATABRICKS_NODE)
         node["parameters"]["options"]["unknownOption"] = "bar"
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            node, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            node, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
         self.assertNotIn("unknownOption", result["parameters"]["options"])
 
-    def test_credential_passthrough(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+    def test_ascerta_databricks_credential(self):
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model",
+            dbx_cred={"id": "ascerta-dbx-1", "name": "Ascerta Databricks API"},
         )
-        self.assertIn("databricks", result["credentials"])
-        self.assertEqual(result["credentials"]["databricks"]["id"], "dbx-cred-1")
-        self.assertEqual(result["credentials"]["databricks"]["name"], "Databricks Workspace")
+        self.assertNotIn("databricks", result["credentials"])
+        self.assertEqual(result["credentials"]["ascertaDatabricksApi"]["id"], "ascerta-dbx-1")
+        self.assertEqual(result["credentials"]["ascertaDatabricksApi"]["name"], "Ascerta Databricks API")
 
-    def test_payi_credential_reference(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+    def test_no_incompatible_native_databricks_credential(self):
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
-        cred_ref = result["credentials"]["payiApi"]
+        self.assertNotIn("databricks", result["credentials"])
+        self.assertNotIn("ascertaDatabricksApi", result["credentials"])
+
+    def test_deployed_model_from_source(self):
+        node = copy.deepcopy(DATABRICKS_NODE)
+        node["parameters"]["deployedModel"] = {"mode": "name", "value": "my-model"}
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            node, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
+        )
+        self.assertEqual(result["parameters"]["deployedModel"], {"mode": "name", "value": "my-model"})
+
+    def test_ascerta_credential_reference(self):
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
+        )
+        cred_ref = result["credentials"]["ascertaApi"]
         self.assertEqual(cred_ref["id"], "cred-123")
-        self.assertEqual(cred_ref["name"], "Pay-i API")
+        self.assertEqual(cred_ref["name"], "Ascerta API")
 
     def test_no_plaintext_provider_key(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-my-token", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-my-token", "Ascerta Databricks Chat Model"
         )
         self.assertNotIn("providerApiKey", result["parameters"])
         self.assertNotIn("accessToken", result["parameters"])
 
     def test_cloud_provider_defaults_to_aws(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
         self.assertEqual(result["parameters"]["cloudProvider"], "aws")
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            DATABRICKS_NODE, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            DATABRICKS_NODE, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
         params = result["parameters"]
         self.assertIn("useCaseName", params)
@@ -2099,10 +2115,10 @@ class TestBuildPayiChatModelDatabricksCommunityNode(unittest.TestCase):
         """Handle n8n 2.x resourceLocator format for endpoint field."""
         node = copy.deepcopy(DATABRICKS_NODE)
         node["parameters"]["endpoint"] = {"__rl": True, "value": "my-fancy-endpoint", "mode": "string"}
-        result = migrate.build_payi_chat_model_databricks_community_node(
-            node, PAYI_CRED, "dapi-test", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_community_node(
+            node, ASCERTA_CRED, "dapi-test", "Ascerta Databricks Chat Model"
         )
-        self.assertEqual(result["parameters"]["endpointName"], "my-fancy-endpoint")
+        self.assertEqual(result["parameters"]["endpointName"], {"mode": "name", "value": "my-fancy-endpoint"})
 
 
 # ── Tests: classify_databricks_shim ──────────────────────────────────────────
@@ -2174,7 +2190,7 @@ class TestClassifyDatabricksShim(unittest.TestCase):
         self.assertFalse(result["detected"])
 
 
-# ── Tests: build_payi_chat_model_databricks_node (shim builder) ──────────────
+# ── Tests: build_ascerta_chat_model_databricks_node (shim builder) ──────────────
 
 DBX_SOURCE_NODE_STRING_MODEL = {
     "id": "src-1",
@@ -2209,19 +2225,19 @@ DBX_SOURCE_NODE_RL_MODEL = {
 DBX_CRED = {"id": "dbx-cred-1", "name": "Databricks PAT"}
 
 
-class TestBuildPayiChatModelDatabricksShimNode(unittest.TestCase):
+class TestBuildAscertaChatModelDatabricksShimNode(unittest.TestCase):
     def test_builds_correct_type_and_position(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "Pay-i Databricks Chat Model"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "Ascerta Databricks Chat Model"
         )
-        self.assertEqual(result["type"], "n8n-nodes-payi.lmChatPayiDatabricks")
+        self.assertEqual(result["type"], "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks")
         self.assertEqual(result["position"], [400, 300])
-        self.assertEqual(result["name"], "Pay-i Databricks Chat Model")
+        self.assertEqual(result["name"], "Ascerta Databricks Chat Model")
         self.assertEqual(result["typeVersion"], 1)
 
     def test_endpoint_name_from_string_model(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "X"
         )
         self.assertEqual(
             result["parameters"]["endpointName"],
@@ -2229,8 +2245,8 @@ class TestBuildPayiChatModelDatabricksShimNode(unittest.TestCase):
         )
 
     def test_endpoint_name_from_resourcelocator_model(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_RL_MODEL, PAYI_CRED, DBX_CRED, "azure", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_RL_MODEL, ASCERTA_CRED, DBX_CRED, "azure", "X"
         )
         self.assertEqual(
             result["parameters"]["endpointName"],
@@ -2239,40 +2255,40 @@ class TestBuildPayiChatModelDatabricksShimNode(unittest.TestCase):
         self.assertEqual(result["parameters"]["cloudProvider"], "azure")
 
     def test_deployed_model_left_empty(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "X"
         )
-        self.assertEqual(result["parameters"]["deployedModel"], "")
+        self.assertEqual(result["parameters"]["deployedModel"], {"mode": "name", "value": ""})
 
     def test_options_subset_passed_through(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "X"
         )
         opts = result["parameters"]["options"]
         self.assertEqual(opts["temperature"], 0.5)
         self.assertEqual(opts["maxTokens"], 2048)
         self.assertEqual(opts["topP"], 0.9)
-        self.assertNotIn("baseURL", opts)  # baseURL is dropped — Pay-i node doesn't use it
+        self.assertNotIn("baseURL", opts)  # baseURL is dropped — Ascerta node doesn't use it
 
     def test_credentials_with_dbx_cred(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "X"
         )
         creds = result["credentials"]
-        self.assertEqual(creds["payiApi"]["id"], "cred-123")
-        self.assertEqual(creds["payiDatabricksApi"], {"id": "dbx-cred-1", "name": "Databricks PAT"})
+        self.assertEqual(creds["ascertaApi"]["id"], "cred-123")
+        self.assertEqual(creds["ascertaDatabricksApi"], {"id": "dbx-cred-1", "name": "Databricks PAT"})
 
     def test_credentials_without_dbx_cred(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, None, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, None, "aws", "X"
         )
         creds = result["credentials"]
-        self.assertIn("payiApi", creds)
-        self.assertNotIn("payiDatabricksApi", creds)
+        self.assertIn("ascertaApi", creds)
+        self.assertNotIn("ascertaDatabricksApi", creds)
 
     def test_tracking_defaults(self):
-        result = migrate.build_payi_chat_model_databricks_node(
-            DBX_SOURCE_NODE_STRING_MODEL, PAYI_CRED, DBX_CRED, "aws", "X"
+        result = migrate.build_ascerta_chat_model_databricks_node(
+            DBX_SOURCE_NODE_STRING_MODEL, ASCERTA_CRED, DBX_CRED, "aws", "X"
         )
         self.assertEqual(
             result["parameters"]["useCaseName"],
@@ -2288,75 +2304,75 @@ class TestBuildPayiChatModelDatabricksShimNode(unittest.TestCase):
 # ── Tests: Audit script Databricks awareness ─────────────────────────────────
 
 DATABRICKS_WF_PATH = os.path.join(
-    os.path.dirname(__file__), "test-workflow-payi-databricks.json"
+    os.path.dirname(__file__), "test-workflow-ascerta-databricks.json"
 )
 
 
 class TestAuditDatabricksRecognition(unittest.TestCase):
-    """The audit script must recognize the new lmChatPayiDatabricks node and the
-    payiDatabricksApi credential type so workflows already on the new Databricks
+    """The audit script must recognize the new lmChatAscertaDatabricks node and the
+    ascertaDatabricksApi credential type so workflows already on the new Databricks
     proxy show up in audit reports instead of being silently dropped."""
 
-    def test_databricks_node_in_payi_node_types(self):
+    def test_databricks_node_in_ascerta_node_types(self):
         self.assertIn(
-            "n8n-nodes-payi.lmChatPayiDatabricks", audit_payi.PAYI_NODE_TYPES
+            "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks", audit_ascerta.ASCERTA_NODE_TYPES
         )
-        info = audit_payi.PAYI_NODE_TYPES["n8n-nodes-payi.lmChatPayiDatabricks"]
-        self.assertEqual(info["category"], "payi_chat_model")
-        self.assertEqual(info["label"], "Pay-i Databricks (Proxy)")
+        info = audit_ascerta.ASCERTA_NODE_TYPES["@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks"]
+        self.assertEqual(info["category"], "ascerta_chat_model")
+        self.assertEqual(info["label"], "Ascerta Databricks (Proxy)")
 
-    def test_payi_node_labels_match_upstream(self):
-        # Sanity-check: display labels match what n8n-nodes-payi v1.x ships.
+    def test_ascerta_node_labels_match_upstream(self):
+        # Sanity-check: display labels match what @ascerta/n8n-nodes-ascerta v1.x ships.
         expected = {
-            "n8n-nodes-payi.lmChatPayi": "Pay-i OpenAI (Proxy)",
-            "n8n-nodes-payi.lmChatPayiAnthropic": "Pay-i Anthropic (Proxy)",
-            "n8n-nodes-payi.lmChatPayiAzure": "Pay-i Azure AI Foundry (Proxy)",
-            "n8n-nodes-payi.lmChatPayiBedrock": "Pay-i Amazon Bedrock (Proxy)",
-            "n8n-nodes-payi.lmChatPayiDatabricks": "Pay-i Databricks (Proxy)",
+            "@ascerta/n8n-nodes-ascerta.lmChatAscerta": "Ascerta OpenAI (Proxy)",
+            "@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic": "Ascerta Anthropic (Proxy)",
+            "@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure": "Ascerta Azure AI Foundry (Proxy)",
+            "@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock": "Ascerta Amazon Bedrock (Proxy)",
+            "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks": "Ascerta Databricks (Proxy)",
         }
         for node_type, label in expected.items():
-            self.assertEqual(audit_payi.PAYI_NODE_TYPES[node_type]["label"], label)
+            self.assertEqual(audit_ascerta.ASCERTA_NODE_TYPES[node_type]["label"], label)
 
-    def test_payi_databricks_credential_type_known(self):
-        self.assertIn("payiDatabricksApi", audit_payi.KNOWN_PAYI_CREDENTIAL_TYPES)
-        # Pay-i credentials are not redirect-eligible (they already point at Pay-i).
+    def test_ascerta_databricks_credential_type_known(self):
+        self.assertIn("ascertaDatabricksApi", audit_ascerta.KNOWN_ASCERTA_CREDENTIAL_TYPES)
+        # Ascerta credentials are not redirect-eligible (they already point at Ascerta).
         self.assertNotIn(
-            "payiDatabricksApi", audit_payi.SUPPORTED_CREDENTIAL_REDIRECT_TYPES
+            "ascertaDatabricksApi", audit_ascerta.SUPPORTED_CREDENTIAL_REDIRECT_TYPES
         )
 
     def test_audit_picks_up_databricks_workflow_fixture(self):
         with open(DATABRICKS_WF_PATH) as f:
             wf = json.load(f)
-        report = audit_payi.build_analysis_report([wf])
+        report = audit_ascerta.build_analysis_report([wf])
         node_types = {n["node_type"] for n in report["nodes"]}
-        self.assertIn("n8n-nodes-payi.lmChatPayiDatabricks", node_types)
-        # The Databricks node should be classified as already-on-Pay-i.
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks", node_types)
+        # The Databricks node should be classified as already-on-Ascerta.
         dbx = next(
             n for n in report["nodes"]
-            if n["node_type"] == "n8n-nodes-payi.lmChatPayiDatabricks"
+            if n["node_type"] == "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks"
         )
-        self.assertEqual(dbx["source"], "payi")
-        self.assertEqual(dbx["recommended_action"], "already_on_payi")
-        # Both Pay-i credentials should be tracked as used by the workflow.
+        self.assertEqual(dbx["source"], "ascerta")
+        self.assertEqual(dbx["recommended_action"], "already_on_ascerta")
+        # Both Ascerta credentials should be tracked as used by the workflow.
         cred_keys = {c["credential_key"] for c in dbx["credential_refs"]}
-        self.assertEqual(cred_keys, {"payiApi", "payiDatabricksApi"})
+        self.assertEqual(cred_keys, {"ascertaApi", "ascertaDatabricksApi"})
 
     def test_choose_migration_action_for_databricks_node(self):
         with open(DATABRICKS_WF_PATH) as f:
             wf = json.load(f)
-        report = audit_payi.build_analysis_report([wf])
+        report = audit_ascerta.build_analysis_report([wf])
         dbx = next(
             n for n in report["nodes"]
-            if n["node_type"] == "n8n-nodes-payi.lmChatPayiDatabricks"
+            if n["node_type"] == "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks"
         )
-        decision = audit_payi.choose_migration_action(dbx, report)
-        self.assertEqual(decision["path"], "already_on_payi")
+        decision = audit_ascerta.choose_migration_action(dbx, report)
+        self.assertEqual(decision["path"], "already_on_ascerta")
         self.assertEqual(decision["confidence"], 1.0)
 
 
-# ── Tests: resolve_payi_databricks_credential ────────────────────────────────
+# ── Tests: resolve_ascerta_databricks_credential ────────────────────────────────
 
-class TestResolvePayiDatabricksCredential(unittest.TestCase):
+class TestResolveAscertaDatabricksCredential(unittest.TestCase):
     def _client_with_creds(self, creds):
         client = MagicMock()
         client.get = MagicMock(side_effect=lambda path, **kw: (
@@ -2378,15 +2394,15 @@ class TestResolvePayiDatabricksCredential(unittest.TestCase):
 
     def test_dry_run_returns_stub(self):
         client = self._client_with_creds([])
-        result = migrate.resolve_payi_databricks_credential(
+        result = migrate.resolve_ascerta_databricks_credential(
             client, self._args(), dry_run=True
         )
         self.assertEqual(result["id"], "dry-run-dbx")
 
     def test_one_existing_credential_reused(self):
-        creds = [{"id": "abc", "name": "DBX 1", "type": "payiDatabricksApi"}]
+        creds = [{"id": "abc", "name": "DBX 1", "type": "ascertaDatabricksApi"}]
         client = self._client_with_creds(creds)
-        result = migrate.resolve_payi_databricks_credential(
+        result = migrate.resolve_ascerta_databricks_credential(
             client, self._args(), dry_run=False
         )
         self.assertEqual(result["id"], "abc")
@@ -2394,19 +2410,19 @@ class TestResolvePayiDatabricksCredential(unittest.TestCase):
 
     def test_two_existing_creds_auto_yes_picks_first(self):
         creds = [
-            {"id": "a", "name": "DBX A", "type": "payiDatabricksApi"},
-            {"id": "b", "name": "DBX B", "type": "payiDatabricksApi"},
+            {"id": "a", "name": "DBX A", "type": "ascertaDatabricksApi"},
+            {"id": "b", "name": "DBX B", "type": "ascertaDatabricksApi"},
         ]
         client = self._client_with_creds(creds)
-        result = migrate.resolve_payi_databricks_credential(
+        result = migrate.resolve_ascerta_databricks_credential(
             client, self._args(auto_yes=True), dry_run=False
         )
         self.assertEqual(result["id"], "a")
 
     def test_explicit_id_resolved(self):
-        creds = [{"id": "xyz", "name": "DBX Pinned", "type": "payiDatabricksApi"}]
+        creds = [{"id": "xyz", "name": "DBX Pinned", "type": "ascertaDatabricksApi"}]
         client = self._client_with_creds(creds)
-        result = migrate.resolve_payi_databricks_credential(
+        result = migrate.resolve_ascerta_databricks_credential(
             client, self._args(databricks_credential_id="xyz"), dry_run=False
         )
         self.assertEqual(result["id"], "xyz")
@@ -2415,19 +2431,19 @@ class TestResolvePayiDatabricksCredential(unittest.TestCase):
         creds = [{"id": "wrong", "name": "OAI", "type": "openAiApi"}]
         client = self._client_with_creds(creds)
         with self.assertRaises(SystemExit):
-            migrate.resolve_payi_databricks_credential(
+            migrate.resolve_ascerta_databricks_credential(
                 client, self._args(databricks_credential_id="wrong"), dry_run=False
             )
 
     def test_two_creds_interactive_valid_pick(self):
         creds = [
-            {"id": "a", "name": "DBX A", "type": "payiDatabricksApi"},
-            {"id": "b", "name": "DBX B", "type": "payiDatabricksApi"},
+            {"id": "a", "name": "DBX A", "type": "ascertaDatabricksApi"},
+            {"id": "b", "name": "DBX B", "type": "ascertaDatabricksApi"},
         ]
         client = self._client_with_creds(creds)
         with patch("builtins.input", return_value="2"), \
              patch.object(migrate, "_is_interactive", return_value=True):
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(), dry_run=False
             )
         self.assertEqual(result["id"], "b")
@@ -2435,67 +2451,67 @@ class TestResolvePayiDatabricksCredential(unittest.TestCase):
     def test_two_creds_interactive_zero_falls_back_to_first(self):
         """Regression: '0' previously returned the LAST credential (negative index)."""
         creds = [
-            {"id": "a", "name": "DBX A", "type": "payiDatabricksApi"},
-            {"id": "b", "name": "DBX B", "type": "payiDatabricksApi"},
+            {"id": "a", "name": "DBX A", "type": "ascertaDatabricksApi"},
+            {"id": "b", "name": "DBX B", "type": "ascertaDatabricksApi"},
         ]
         client = self._client_with_creds(creds)
         with patch("builtins.input", return_value="0"), \
              patch.object(migrate, "_is_interactive", return_value=True):
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(), dry_run=False
             )
         self.assertEqual(result["id"], "a")  # first, not last
 
     def test_two_creds_interactive_out_of_range_falls_back_to_first(self):
         creds = [
-            {"id": "a", "name": "DBX A", "type": "payiDatabricksApi"},
-            {"id": "b", "name": "DBX B", "type": "payiDatabricksApi"},
+            {"id": "a", "name": "DBX A", "type": "ascertaDatabricksApi"},
+            {"id": "b", "name": "DBX B", "type": "ascertaDatabricksApi"},
         ]
         client = self._client_with_creds(creds)
         with patch("builtins.input", return_value="99"), \
              patch.object(migrate, "_is_interactive", return_value=True):
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(), dry_run=False
             )
         self.assertEqual(result["id"], "a")
 
     def test_two_creds_interactive_invalid_string_falls_back_to_first(self):
         creds = [
-            {"id": "a", "name": "DBX A", "type": "payiDatabricksApi"},
-            {"id": "b", "name": "DBX B", "type": "payiDatabricksApi"},
+            {"id": "a", "name": "DBX A", "type": "ascertaDatabricksApi"},
+            {"id": "b", "name": "DBX B", "type": "ascertaDatabricksApi"},
         ]
         client = self._client_with_creds(creds)
         with patch("builtins.input", return_value="not a number"), \
              patch.object(migrate, "_is_interactive", return_value=True):
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(), dry_run=False
             )
         self.assertEqual(result["id"], "a")
 
     def test_no_creds_with_env_vars_creates(self):
         client = self._client_with_creds([])
-        env = {"PAYI_DBX_PAT": "dapi-test", "PAYI_DBX_WORKSPACE_URL": "https://x.cloud.databricks.com"}
+        env = {"ASCERTA_DBX_PAT": "dapi-test", "ASCERTA_DBX_WORKSPACE_URL": "https://x.cloud.databricks.com"}
         with patch.dict(os.environ, env, clear=False):
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(auto_yes=True), dry_run=False
             )
         self.assertEqual(result["id"], "new-dbx")
         # POST was called with the PAT
         self.assertTrue(client.post.called)
         post_body = client.post.call_args[0][1]
-        self.assertEqual(post_body["type"], "payiDatabricksApi")
+        self.assertEqual(post_body["type"], "ascertaDatabricksApi")
         self.assertEqual(post_body["data"]["accessToken"], "dapi-test")
         self.assertEqual(post_body["data"]["workspaceUrl"], "https://x.cloud.databricks.com")
 
     def test_no_creds_no_env_no_interactive_returns_none(self):
         client = self._client_with_creds([])
         # Make sure the env vars are NOT set
-        env_to_clear = {"PAYI_DBX_PAT": "", "PAYI_DBX_WORKSPACE_URL": ""}
+        env_to_clear = {"ASCERTA_DBX_PAT": "", "ASCERTA_DBX_WORKSPACE_URL": ""}
         with patch.dict(os.environ, env_to_clear, clear=False):
-            for var in ("PAYI_DBX_PAT", "PAYI_DBX_WORKSPACE_URL"):
+            for var in ("ASCERTA_DBX_PAT", "ASCERTA_DBX_WORKSPACE_URL"):
                 if var in os.environ and os.environ[var] == "":
                     del os.environ[var]
-            result = migrate.resolve_payi_databricks_credential(
+            result = migrate.resolve_ascerta_databricks_credential(
                 client, self._args(auto_yes=True), dry_run=False
             )
         self.assertIsNone(result)
@@ -2533,8 +2549,8 @@ class TestDatabricksShimEndToEnd(unittest.TestCase):
                 return copy.deepcopy(workflow)
             if method == "GET" and path == "/api/v1/credentials":
                 return {"data": [
-                    {"id": "c-payi", "name": "Pay-i API", "type": "payiApi"},
-                    {"id": "c-dbx", "name": "Databricks PAT", "type": "payiDatabricksApi"},
+                    {"id": "c-ascerta", "name": "Ascerta API", "type": "ascertaApi"},
+                    {"id": "c-dbx", "name": "Databricks PAT", "type": "ascertaDatabricksApi"},
                 ]}
             if method == "PUT":
                 put_calls.append({"path": path, "body": body})
@@ -2546,8 +2562,8 @@ class TestDatabricksShimEndToEnd(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
         }
         with patch.dict(os.environ, env, clear=False):
             with patch("sys.argv", ["migrate", "--auto-yes", "--strategy", "replace"]):
@@ -2557,21 +2573,21 @@ class TestDatabricksShimEndToEnd(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertEqual(len(put_calls), 1)
         node_types = {n["type"] for n in put_calls[0]["body"]["nodes"]}
-        self.assertIn("n8n-nodes-payi.lmChatPayiDatabricks", node_types)
-        self.assertIn("n8n-nodes-payi.lmChatPayi", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks", node_types)
+        self.assertIn("@ascerta/n8n-nodes-ascerta.lmChatAscerta", node_types)
         # Both native lmChatOpenAi nodes are gone
         self.assertNotIn("@n8n/n8n-nodes-langchain.lmChatOpenAi", node_types)
 
         # The Databricks node has the right cloudProvider
         dbx_node = next(n for n in put_calls[0]["body"]["nodes"]
-                        if n["type"] == "n8n-nodes-payi.lmChatPayiDatabricks")
+                        if n["type"] == "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks")
         self.assertEqual(dbx_node["parameters"]["cloudProvider"], "aws")
         self.assertEqual(
             dbx_node["parameters"]["endpointName"]["value"],
             "databricks-claude-sonnet-4-6",
         )
-        # payiDatabricksApi credential was wired up
-        self.assertEqual(dbx_node["credentials"]["payiDatabricksApi"]["id"], "c-dbx")
+        # ascertaDatabricksApi credential was wired up
+        self.assertEqual(dbx_node["credentials"]["ascertaDatabricksApi"]["id"], "c-dbx")
 
     def test_dry_run_resolver_returns_stub_directly(self):
         """The dry-run path produces the sentinel stub credential
@@ -2585,7 +2601,7 @@ class TestDatabricksShimEndToEnd(unittest.TestCase):
             databricks_cloud="aws",
             auto_yes=True,
         )
-        result = migrate.resolve_payi_databricks_credential(
+        result = migrate.resolve_ascerta_databricks_credential(
             client, args, dry_run=True
         )
         self.assertEqual(result["id"], "dry-run-dbx")
@@ -2612,8 +2628,8 @@ class TestDatabricksShimEndToEnd(unittest.TestCase):
         env = {
             "N8N_BASE_URL": "http://localhost:5678",
             "N8N_API_KEY": "test-key",
-            "PAYI_BASE_URL": "https://api.pay-i.com",
-            "PAYI_API_KEY": "pk-test",
+            "ASCERTA_BASE_URL": "https://api.ascerta.com",
+            "ASCERTA_API_KEY": "pk-test",
         }
         with patch.dict(os.environ, env, clear=False):
             with patch("sys.argv", ["migrate", "--dry-run", "--auto-yes"]):
@@ -2636,7 +2652,7 @@ class TestAuditClassifyDatabricksShim(unittest.TestCase):
                 "options": {"baseURL": "https://e2.cloud.databricks.com/v1"},
             },
         }
-        result = audit_payi.classify_databricks_shim(node, client=None)
+        result = audit_ascerta.classify_databricks_shim(node, client=None)
         self.assertTrue(result["detected"])
         self.assertEqual(result["cloud_provider"], "aws")
 
@@ -2654,12 +2670,12 @@ class TestAuditClassifyDatabricksShim(unittest.TestCase):
             }],
             "connections": {},
         }
-        report = audit_payi.build_analysis_report([wf])
+        report = audit_ascerta.build_analysis_report([wf])
         node = report["nodes"][0]
         self.assertIn("databricks_shim", node)
         self.assertTrue(node["databricks_shim"]["detected"])
         self.assertEqual(node["databricks_shim"]["cloud_provider"], "azure")
-        self.assertEqual(node["recommended_action"], "replace_with_payi_databricks")
+        self.assertEqual(node["recommended_action"], "replace_with_ascerta_databricks")
 
     def test_audit_does_not_classify_plain_openai_as_shim(self):
         """A plain lmChatOpenAi node gets databricks_shim with detected=False
@@ -2674,13 +2690,13 @@ class TestAuditClassifyDatabricksShim(unittest.TestCase):
             }],
             "connections": {},
         }
-        report = audit_payi.build_analysis_report([wf])
+        report = audit_ascerta.build_analysis_report([wf])
         node = report["nodes"][0]
         self.assertIn("databricks_shim", node)
         self.assertFalse(node["databricks_shim"]["detected"])
         self.assertEqual(node["databricks_shim"]["source"], "none")
         # Original recommended_action is preserved (not overridden)
-        self.assertNotEqual(node["recommended_action"], "replace_with_payi_databricks")
+        self.assertNotEqual(node["recommended_action"], "replace_with_ascerta_databricks")
 
 
 if __name__ == "__main__":

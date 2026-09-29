@@ -1,6 +1,6 @@
 {
   "id": "wf-databricks-sample",
-  "name": "Pay-i Databricks Sample",
+  "name": "Ascerta Databricks Sample",
   "nodes": [
     {
       "id": "trigger-1",
@@ -23,8 +23,8 @@
     },
     {
       "id": "dbx-chat-1",
-      "name": "Pay-i Databricks (Proxy)",
-      "type": "n8n-nodes-payi.lmChatPayiDatabricks",
+      "name": "Ascerta Databricks (Proxy)",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks",
       "typeVersion": 1,
       "position": [600, 500],
       "parameters": {
@@ -32,7 +32,7 @@
           "mode": "name",
           "value": "databricks-claude-sonnet-4-6"
         },
-        "deployedModel": "claude-sonnet-4-6",
+        "deployedModel": {"mode": "name", "value": "claude-sonnet-4-6"},
         "cloudProvider": "aws",
         "options": {
           "temperature": 0.5,
@@ -43,11 +43,11 @@
         "useCaseStep": "={{ $node.name }}"
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         },
-        "payiDatabricksApi": {
+        "ascertaDatabricksApi": {
           "id": "cred-dbx-1",
           "name": "Databricks PAT"
         }
@@ -58,7 +58,7 @@
     "Manual Trigger": {
       "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]]
     },
-    "Pay-i Databricks (Proxy)": {
+    "Ascerta Databricks (Proxy)": {
       "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]]
     }
   }

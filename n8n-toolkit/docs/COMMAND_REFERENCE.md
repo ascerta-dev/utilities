@@ -2,14 +2,14 @@
 
 > **[Back to Documentation Index](./README.md)**
 
-## `audit-configure-payi-proxy.py`
+## `audit-configure-ascerta-proxy.py`
 
 Audit workflows and emit migration/compliance reports.
 
 ### Typical Use
 
 ```bash
-python3 audit-configure-payi-proxy.py --out ./audit.json
+python3 audit-configure-ascerta-proxy.py --out ./audit.json
 ```
 
 ### Key Options
@@ -24,7 +24,7 @@ python3 audit-configure-payi-proxy.py --out ./audit.json
 - `--yes`: skip apply confirmation prompt
 - `--non-interactive`: fail if required inputs are missing (no prompts; recommended for CI/pipelines)
 - `--n8n-base-url URL`, `--n8n-api-key KEY`
-- `--payi-base-url URL`, `--payi-api-key KEY`
+- `--ascerta-base-url URL`, `--ascerta-api-key KEY`
 - `--verbose`: show API call logs
 - `--insecure`: disable TLS verification (local/self-signed environments only; never use in production)
 
@@ -33,17 +33,17 @@ python3 audit-configure-payi-proxy.py --out ./audit.json
 - `--configure-credentials` cannot be combined with `--from-json`.
 - Auto-apply patches only credentials with `redirect_capability=likely_supported`.
 - `unverified` credentials require manual validation before apply.
-- Detection scope is limited to mapped native/Pay-i node types.
+- Detection scope is limited to mapped native/Ascerta node types.
 - Full details: [Limitations and Known Issues](./LIMITATIONS_AND_KNOWN_ISSUES.md)
 
-## `migrate-workflows-to-payi.py`
+## `migrate-workflows-to-ascerta.py`
 
 Interactive migration orchestrator for redirect and/or node replacement.
 
 ### Typical Use
 
 ```bash
-python3 migrate-workflows-to-payi.py
+python3 migrate-workflows-to-ascerta.py
 ```
 
 ### Key Options
@@ -56,25 +56,25 @@ python3 migrate-workflows-to-payi.py
 
 ### CI/Pipeline Usage
 
-This script does not have a `--non-interactive` flag. For unattended use, set all four environment variables (`N8N_BASE_URL`, `N8N_API_KEY`, `PAYI_BASE_URL`, `PAYI_API_KEY`) and combine `--auto-yes` with `--strategy`:
+This script does not have a `--non-interactive` flag. For unattended use, set all four environment variables (`N8N_BASE_URL`, `N8N_API_KEY`, `ASCERTA_BASE_URL`, `ASCERTA_API_KEY`) and combine `--auto-yes` with `--strategy`:
 
 ```bash
-python3 migrate-workflows-to-payi.py --auto-yes --strategy both
+python3 migrate-workflows-to-ascerta.py --auto-yes --strategy both
 ```
 
 ### Strategy Modes
 
-- `redirect`: patch redirectable credentials to Pay-i proxy URLs
-- `replace`: replace supported nodes with Pay-i nodes
+- `redirect`: patch redirectable credentials to Ascerta proxy URLs
+- `replace`: replace supported nodes with Ascerta nodes
 - `both`: run redirect + replacement
 
-## `migrate-to-payi.sh`
+## `migrate-to-ascerta.sh`
 
 Bulk credential redirect script.
 
 ### Required Environment Variables
 
-All four must be set: `N8N_BASE_URL`, `N8N_API_KEY`, `PAYI_BASE_URL`, `PAYI_API_KEY`.
+All four must be set: `N8N_BASE_URL`, `N8N_API_KEY`, `ASCERTA_BASE_URL`, `ASCERTA_API_KEY`.
 
 ### Behavior
 
@@ -82,13 +82,13 @@ All four must be set: `N8N_BASE_URL`, `N8N_API_KEY`, `PAYI_BASE_URL`, `PAYI_API_
 - Targets `openAiApi`, `anthropicApi`, `azureOpenAiApi`
 - Prompts for provider API key values before patching
 
-## `migrate-openai-to-payi.sh`
+## `migrate-openai-to-ascerta.sh`
 
 OpenAI-only credential redirect script.
 
 ### Required Environment Variables
 
-`N8N_BASE_URL`, `N8N_API_KEY`, `PAYI_BASE_URL` are required. `PAYI_API_KEY` is optional (a reminder is printed if unset, but the script continues).
+`N8N_BASE_URL`, `N8N_API_KEY`, `ASCERTA_BASE_URL` are required. `ASCERTA_API_KEY` is optional (a reminder is printed if unset, but the script continues).
 
 ---
 

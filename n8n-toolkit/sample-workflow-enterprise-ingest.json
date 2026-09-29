@@ -139,9 +139,9 @@
       }
     },
     {
-      "id": "payi-proxy-openai-001",
-      "name": "Pay-i Proxy OpenAI",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-proxy-openai-001",
+      "name": "Ascerta Proxy OpenAI",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [760, 260],
       "parameters": {
@@ -157,16 +157,16 @@
         "debugLogging": false
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         }
       }
     },
     {
-      "id": "payi-proxy-anthropic-001",
-      "name": "Pay-i Proxy Anthropic",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-proxy-anthropic-001",
+      "name": "Ascerta Proxy Anthropic",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [760, 380],
       "parameters": {
@@ -182,16 +182,16 @@
         "debugLogging": false
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         }
       }
     },
     {
-      "id": "payi-proxy-azure-001",
-      "name": "Pay-i Proxy Azure OpenAI",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-proxy-azure-001",
+      "name": "Ascerta Proxy Azure OpenAI",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [760, 500],
       "parameters": {
@@ -209,16 +209,16 @@
         "debugLogging": false
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         }
       }
     },
     {
-      "id": "payi-proxy-bedrock-001",
-      "name": "Pay-i Proxy Bedrock",
-      "type": "n8n-nodes-payi.payi",
+      "id": "ascerta-proxy-bedrock-001",
+      "name": "Ascerta Proxy Bedrock",
+      "type": "@ascerta/n8n-nodes-ascerta.ascerta",
       "typeVersion": 1,
       "position": [760, 620],
       "parameters": {
@@ -237,16 +237,16 @@
         "debugLogging": false
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         }
       }
     },
     {
-      "id": "payi-chat-model-001",
-      "name": "Pay-i Chat Model",
-      "type": "n8n-nodes-payi.lmChatPayi",
+      "id": "ascerta-chat-model-001",
+      "name": "Ascerta Chat Model",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
       "typeVersion": 1,
       "position": [760, 740],
       "parameters": {
@@ -262,9 +262,9 @@
         "useCaseStep": "agent_reasoning"
       },
       "credentials": {
-        "payiApi": {
-          "id": "cred-payi-1",
-          "name": "Pay-i API"
+        "ascertaApi": {
+          "id": "cred-ascerta-1",
+          "name": "Ascerta API"
         }
       }
     },
@@ -281,14 +281,14 @@
       }
     },
     {
-      "id": "agent-payi-001",
-      "name": "AI Agent Payi",
+      "id": "agent-ascerta-001",
+      "name": "AI Agent Ascerta",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1,
       "position": [1120, 620],
       "parameters": {
-        "text": "={{ $('Pay-i Chat Model').item.json.output || $('Pay-i Proxy OpenAI').item.json.choices[0].message.content }}",
-        "fallback": "={{ $('Pay-i Proxy Anthropic').item.json.content[0].text || $('Pay-i Proxy Azure OpenAI').item.json.choices[0].message.content }}"
+        "text": "={{ $('Ascerta Chat Model').item.json.output || $('Ascerta Proxy OpenAI').item.json.choices[0].message.content }}",
+        "fallback": "={{ $('Ascerta Proxy Anthropic').item.json.content[0].text || $('Ascerta Proxy Azure OpenAI').item.json.choices[0].message.content }}"
       }
     },
     {
@@ -318,26 +318,26 @@
             },
             {
               "id": "out-2",
-              "name": "payi_openai_cost",
-              "value": "={{ $('Pay-i Proxy OpenAI').item.json.payiCost || 'missing' }}",
+              "name": "ascerta_openai_cost",
+              "value": "={{ $('Ascerta Proxy OpenAI').item.json.ascertaCost || 'missing' }}",
               "type": "string"
             },
             {
               "id": "out-3",
-              "name": "payi_anthropic_cost",
-              "value": "={{ $('Pay-i Proxy Anthropic').item.json.payiCost || 'missing' }}",
+              "name": "ascerta_anthropic_cost",
+              "value": "={{ $('Ascerta Proxy Anthropic').item.json.ascertaCost || 'missing' }}",
               "type": "string"
             },
             {
               "id": "out-4",
-              "name": "payi_azure_cost",
-              "value": "={{ $('Pay-i Proxy Azure OpenAI').item.json.payiCost || 'missing' }}",
+              "name": "ascerta_azure_cost",
+              "value": "={{ $('Ascerta Proxy Azure OpenAI').item.json.ascertaCost || 'missing' }}",
               "type": "string"
             },
             {
               "id": "out-5",
-              "name": "payi_bedrock_cost",
-              "value": "={{ $('Pay-i Proxy Bedrock').item.json.payiCost || 'missing' }}",
+              "name": "ascerta_bedrock_cost",
+              "value": "={{ $('Ascerta Proxy Bedrock').item.json.ascertaCost || 'missing' }}",
               "type": "string"
             },
             {
@@ -348,8 +348,8 @@
             },
             {
               "id": "out-7",
-              "name": "agent_payi",
-              "value": "={{ $('AI Agent Payi').item.json }}",
+              "name": "agent_ascerta",
+              "value": "={{ $('AI Agent Ascerta').item.json }}",
               "type": "string"
             }
           ]
@@ -368,22 +368,22 @@
             "index": 0
           },
           {
-            "node": "Pay-i Proxy OpenAI",
+            "node": "Ascerta Proxy OpenAI",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Pay-i Proxy Anthropic",
+            "node": "Ascerta Proxy Anthropic",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Pay-i Proxy Azure OpenAI",
+            "node": "Ascerta Proxy Azure OpenAI",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Pay-i Proxy Bedrock",
+            "node": "Ascerta Proxy Bedrock",
             "type": "main",
             "index": 0
           }
@@ -434,11 +434,11 @@
         ]
       ]
     },
-    "Pay-i Chat Model": {
+    "Ascerta Chat Model": {
       "ai_languageModel": [
         [
           {
-            "node": "AI Agent Payi",
+            "node": "AI Agent Ascerta",
             "type": "ai_languageModel",
             "index": 0
           }
@@ -456,7 +456,7 @@
         ]
       ]
     },
-    "Pay-i Proxy OpenAI": {
+    "Ascerta Proxy OpenAI": {
       "main": [
         [
           {
@@ -467,7 +467,7 @@
         ]
       ]
     },
-    "Pay-i Proxy Anthropic": {
+    "Ascerta Proxy Anthropic": {
       "main": [
         [
           {
@@ -478,7 +478,7 @@
         ]
       ]
     },
-    "Pay-i Proxy Azure OpenAI": {
+    "Ascerta Proxy Azure OpenAI": {
       "main": [
         [
           {
@@ -489,7 +489,7 @@
         ]
       ]
     },
-    "Pay-i Proxy Bedrock": {
+    "Ascerta Proxy Bedrock": {
       "main": [
         [
           {
@@ -511,7 +511,7 @@
         ]
       ]
     },
-    "AI Agent Payi": {
+    "AI Agent Ascerta": {
       "main": [
         [
           {

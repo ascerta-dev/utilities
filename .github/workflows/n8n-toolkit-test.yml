@@ -37,4 +37,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: shellcheck
         working-directory: n8n-toolkit
-        run: shellcheck migrate-to-payi.sh migrate-openai-to-payi.sh
+        run: shellcheck migrate-to-ascerta.sh migrate-openai-to-ascerta.sh

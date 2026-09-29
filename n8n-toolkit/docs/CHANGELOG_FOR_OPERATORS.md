@@ -5,6 +5,20 @@
 This changelog is for platform operators running migrations and audits in n8n environments.
 It focuses on operational impact, required actions, and rollout risk.
 
+## 2026-09-29
+
+### Changed
+- Install `@ascerta/n8n-nodes-ascerta` for replacement migrations. Generated
+  workflow types now use the `@ascerta/n8n-nodes-ascerta.*` namespace and
+  Ascerta credential types.
+- Script names now use `ascerta`; environment variables previously prefixed
+  with the former brand now use `ASCERTA_`. Update existing runbooks and CI jobs.
+- Databricks replacements use `ascertaDatabricksApi`; native `databricks`
+  credentials cannot be copied to the Ascerta node. Review custom endpoint
+  **Deployed Model** values before running migrated workflows.
+
+---
+
 ## 2026-03-06
 
 ### Added
@@ -12,9 +26,8 @@ It focuses on operational impact, required actions, and rollout risk.
   - Migration script detects and replaces three native Databricks node types:
     `n8n-nodes-databricks.databricks`, `n8n-nodes-databricks.lmChatDatabricks`,
     `n8n-nodes-databricks.databricksAiAgent`
-  - Builds Pay-i Databricks replacement nodes (`lmChatPayiDatabricks`) with
-    correct credential mapping using the native `databricks` credential type
-  - Audit script now flags Databricks community nodes with `replace_with_payi_node` recommendation
+  - Builds Ascerta Databricks replacement nodes (`lmChatAscertaDatabricks`)
+  - Audit script now flags Databricks community nodes with `replace_with_ascerta_node` recommendation
 - Databricks credential provisioning support in `PROVIDER_CREDENTIAL_CONFIG`
   (fields: `token`, `host`; env vars: `DATABRICKS_TOKEN`, `DATABRICKS_WORKSPACE_URL`)
 - Test coverage for Databricks detection, node building, credential passthrough,
@@ -25,7 +38,7 @@ It focuses on operational impact, required actions, and rollout risk.
   audit reports, and workflow fixtures
 
 ### Operational Impact
-- Operators can now migrate Databricks community node workflows to Pay-i
+- Operators can now migrate Databricks community node workflows to Ascerta
   with the same `--dry-run` / apply workflow used for other providers
 - Audit reports will now surface Databricks nodes that should be replaced
 
@@ -33,7 +46,7 @@ It focuses on operational impact, required actions, and rollout risk.
 - If migrating Databricks workflows, ensure the following are available:
   - A Databricks Personal Access Token (`DATABRICKS_TOKEN`)
   - The Databricks workspace URL (`DATABRICKS_WORKSPACE_URL`)
-- The `n8n-nodes-payi` package must be at **v0.3.0+** for Databricks node support
+- Use a current `@ascerta/n8n-nodes-ascerta` release with Databricks node support
 
 ---
 
@@ -63,7 +76,7 @@ It focuses on operational impact, required actions, and rollout risk.
 ## 2026-03-02
 
 ### Added
-- New audit tool: `audit-configure-payi-proxy.py`
+- New audit tool: `audit-configure-ascerta-proxy.py`
   - Workflow/provider inventory
   - Credential redirect capability probing
   - Per-node migration manifest with recommended path and confidence
@@ -83,7 +96,7 @@ It focuses on operational impact, required actions, and rollout risk.
 ### Required Operator Action
 - None required for existing scripts.
 - Recommended:
-  1. Add `audit-configure-payi-proxy.py` to pre-migration checks.
+  1. Add `audit-configure-ascerta-proxy.py` to pre-migration checks.
   2. Store both `.json` and `.md` audit artifacts for each migration batch.
 
 ### Known Limitations

@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """
-migrate-workflows-to-payi.py
+migrate-workflows-to-ascerta.py
 
 Scans n8n workflows for native LLM nodes (OpenAI, Anthropic, etc.)
-and replaces them with Pay-i Proxy or Pay-i Chat Model nodes.
+and replaces them with Ascerta Proxy or Ascerta Chat Model nodes.
 
 Requires: Python 3.10+, no pip dependencies (stdlib only).
 
 Environment variables:
   N8N_BASE_URL   - Your n8n instance (e.g. http://localhost:5678)
   N8N_API_KEY    - n8n API key (Settings > API > Create API Key)
-  PAYI_BASE_URL  - Pay-i instance (e.g. https://api.yourcompany.pay-i.com)
-  PAYI_API_KEY   - Your Pay-i API key
+  ASCERTA_BASE_URL  - Ascerta instance (e.g. https://api.yourcompany.ascerta.com)
+  ASCERTA_API_KEY   - Your Ascerta API key
 
   Provider API keys are NOT needed for Chat Model migration — the existing
-  credentials on each node are automatically passed through to the Pay-i node.
+  credentials on each node are automatically passed through to the Ascerta node.
 
 Usage:
-  python3 migrate-workflows-to-payi.py [OPTIONS]
+  python3 migrate-workflows-to-ascerta.py [OPTIONS]
 
 Options:
   --dry-run       Show what would change without modifying anything
@@ -149,35 +149,35 @@ NATIVE_LLM_NODES = {
         "replacement": None,
         "feasible": False,
         "label": "Google Gemini Chat Model",
-        "skip_reason": "Google proxy route not yet available in Pay-i",
+        "skip_reason": "Google proxy route not yet available in Ascerta",
     },
     "@n8n/n8n-nodes-langchain.lmChatGoogleVertex": {
         "provider": "google",
         "replacement": None,
         "feasible": False,
         "label": "Google Vertex Chat Model",
-        "skip_reason": "Google proxy route not yet available in Pay-i",
+        "skip_reason": "Google proxy route not yet available in Ascerta",
     },
     "@n8n/n8n-nodes-langchain.googleGemini": {
         "provider": "google",
         "replacement": None,
         "feasible": False,
         "label": "Google Gemini (App Node)",
-        "skip_reason": "Google proxy route not yet available in Pay-i",
+        "skip_reason": "Google proxy route not yet available in Ascerta",
     },
     "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini": {
         "provider": "google",
         "replacement": None,
         "feasible": False,
         "label": "Google Gemini Embeddings",
-        "skip_reason": "Google proxy route not yet available in Pay-i",
+        "skip_reason": "Google proxy route not yet available in Ascerta",
     },
     "@n8n/n8n-nodes-langchain.embeddingsGoogleVertex": {
         "provider": "google",
         "replacement": None,
         "feasible": False,
         "label": "Google Vertex Embeddings",
-        "skip_reason": "Google proxy route not yet available in Pay-i",
+        "skip_reason": "Google proxy route not yet available in Ascerta",
     },
     # ── Other providers (detected but not yet migratable) ───────────────────
     "@n8n/n8n-nodes-langchain.lmChatMistralCloud": {
@@ -185,56 +185,56 @@ NATIVE_LLM_NODES = {
         "replacement": None,
         "feasible": False,
         "label": "Mistral Chat Model",
-        "skip_reason": "Mistral is not a supported Pay-i provider",
+        "skip_reason": "Mistral is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.embeddingsMistralCloud": {
         "provider": "mistral",
         "replacement": None,
         "feasible": False,
         "label": "Mistral Embeddings",
-        "skip_reason": "Mistral is not a supported Pay-i provider",
+        "skip_reason": "Mistral is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatGroq": {
         "provider": "groq",
         "replacement": None,
         "feasible": False,
         "label": "Groq Chat Model",
-        "skip_reason": "Groq is not a supported Pay-i provider",
+        "skip_reason": "Groq is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatDeepSeek": {
         "provider": "deepseek",
         "replacement": None,
         "feasible": False,
         "label": "DeepSeek Chat Model",
-        "skip_reason": "DeepSeek is not a supported Pay-i provider",
+        "skip_reason": "DeepSeek is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatCohere": {
         "provider": "cohere",
         "replacement": None,
         "feasible": False,
         "label": "Cohere Chat Model",
-        "skip_reason": "Cohere is not a supported Pay-i provider",
+        "skip_reason": "Cohere is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.embeddingsCohere": {
         "provider": "cohere",
         "replacement": None,
         "feasible": False,
         "label": "Cohere Embeddings",
-        "skip_reason": "Cohere is not a supported Pay-i provider",
+        "skip_reason": "Cohere is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatXAiGrok": {
         "provider": "xai",
         "replacement": None,
         "feasible": False,
         "label": "xAI Grok Chat Model",
-        "skip_reason": "xAI is not a supported Pay-i provider",
+        "skip_reason": "xAI is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatOpenRouter": {
         "provider": "openrouter",
         "replacement": None,
         "feasible": False,
         "label": "OpenRouter Chat Model",
-        "skip_reason": "OpenRouter is not a supported Pay-i provider",
+        "skip_reason": "OpenRouter is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmChatOllama": {
         "provider": "ollama",
@@ -262,21 +262,21 @@ NATIVE_LLM_NODES = {
         "replacement": None,
         "feasible": False,
         "label": "Vercel AI Gateway Chat Model",
-        "skip_reason": "Vercel AI Gateway is not a supported Pay-i provider",
+        "skip_reason": "Vercel AI Gateway is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.lmOpenHuggingFaceInference": {
         "provider": "huggingface",
         "replacement": None,
         "feasible": False,
         "label": "HuggingFace Inference Model",
-        "skip_reason": "HuggingFace is not a supported Pay-i provider",
+        "skip_reason": "HuggingFace is not a supported Ascerta provider",
     },
     "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference": {
         "provider": "huggingface",
         "replacement": None,
         "feasible": False,
         "label": "HuggingFace Embeddings",
-        "skip_reason": "HuggingFace is not a supported Pay-i provider",
+        "skip_reason": "HuggingFace is not a supported Ascerta provider",
     },
     # ── Databricks / AgentBricks ─────────────────────────────────────────────
     # Community node: n8n-nodes-databricks
@@ -463,21 +463,21 @@ def setup_connection_details(args) -> dict:
         raise SystemExit(1)
 
     print()
-    payi_base = prompt_value("Pay-i Base URL", "PAYI_BASE_URL", "https://api.pay-i.com")
-    if not payi_base:
-        print(f"  {red('ERROR')}: Pay-i URL is required")
+    ascerta_base = prompt_value("Ascerta Base URL", "ASCERTA_BASE_URL", "https://api.ascerta.com")
+    if not ascerta_base:
+        print(f"  {red('ERROR')}: Ascerta URL is required")
         raise SystemExit(1)
 
-    payi_key = prompt_value("Pay-i API Key", "PAYI_API_KEY", secret=True)
-    if not payi_key:
-        print(f"  {red('ERROR')}: Pay-i API key is required")
+    ascerta_key = prompt_value("Ascerta API Key", "ASCERTA_API_KEY", secret=True)
+    if not ascerta_key:
+        print(f"  {red('ERROR')}: Ascerta API key is required")
         raise SystemExit(1)
 
     return {
         "n8n_base": n8n_base.rstrip("/"),
         "n8n_key": n8n_key,
-        "payi_base": payi_base.rstrip("/"),
-        "payi_key": payi_key,
+        "ascerta_base": ascerta_base.rstrip("/"),
+        "ascerta_key": ascerta_key,
     }
 
 
@@ -703,9 +703,9 @@ def find_databricks_nodes(workflows: list) -> list:
 
 # ── Credential Management ────────────────────────────────────────────────────
 
-def ensure_payi_credential(client: N8nApiClient, payi_api_key: str, payi_base_url: str) -> dict:
-    """Find or create a payiApi credential in n8n. Returns {id, name}."""
-    print(f"  Checking for Pay-i credential in n8n...")
+def ensure_ascerta_credential(client: N8nApiClient, ascerta_api_key: str, ascerta_base_url: str) -> dict:
+    """Find or create a ascertaApi credential in n8n. Returns {id, name}."""
+    print(f"  Checking for Ascerta credential in n8n...")
 
     creds_resp = client.get("/api/v1/credentials")
     creds = creds_resp.get("data", creds_resp) if isinstance(creds_resp, dict) else creds_resp
@@ -714,32 +714,32 @@ def ensure_payi_credential(client: N8nApiClient, payi_api_key: str, payi_base_ur
         creds = [creds_resp] if creds_resp.get("type") else []
 
     for c in creds:
-        if c.get("type") == "payiApi":
-            print(f'  {green("Found")} Pay-i credential: "{c["name"]}" (ID: {c["id"]})')
+        if c.get("type") == "ascertaApi":
+            print(f'  {green("Found")} Ascerta credential: "{c["name"]}" (ID: {c["id"]})')
             return {"id": c["id"], "name": c["name"]}
 
-    print(f"  No Pay-i credential found — creating one...")
+    print(f"  No Ascerta credential found — creating one...")
     new_cred = client.post("/api/v1/credentials", {
-        "name": "Pay-i API",
-        "type": "payiApi",
+        "name": "Ascerta API",
+        "type": "ascertaApi",
         "data": {
-            "apiKey": payi_api_key,
-            "baseUrl": payi_base_url,
+            "apiKey": ascerta_api_key,
+            "baseUrl": ascerta_base_url,
         },
     })
     cred_id = new_cred.get("id", "?")
-    print(f'  {green("Created")} Pay-i credential: "Pay-i API" (ID: {cred_id})')
-    return {"id": cred_id, "name": "Pay-i API"}
+    print(f'  {green("Created")} Ascerta credential: "Ascerta API" (ID: {cred_id})')
+    return {"id": cred_id, "name": "Ascerta API"}
 
 
-def resolve_payi_databricks_credential(client: N8nApiClient, args, dry_run: bool):
-    """Resolve a payiDatabricksApi credential for the migration run.
+def resolve_ascerta_databricks_credential(client: N8nApiClient, args, dry_run: bool):
+    """Resolve a ascertaDatabricksApi credential for the migration run.
 
     Returns {"id", "name"} or None. Runs once per migration; the result
     is reused across all Databricks-shim node replacements.
     """
     if dry_run:
-        return {"id": "dry-run-dbx", "name": "Pay-i Databricks (dry run)"}
+        return {"id": "dry-run-dbx", "name": "Ascerta Databricks (dry run)"}
 
     # Explicit ID flag wins
     explicit_id = getattr(args, "databricks_credential_id", None)
@@ -749,9 +749,9 @@ def resolve_payi_databricks_credential(client: N8nApiClient, args, dry_run: bool
         # versions — unwrap before the type check.
         if isinstance(cred, dict) and "type" not in cred and isinstance(cred.get("data"), dict):
             cred = cred["data"]
-        if cred.get("type") != "payiDatabricksApi":
+        if cred.get("type") != "ascertaDatabricksApi":
             print(f"  {red('ERROR')}: --databricks-credential-id {explicit_id} "
-                  f"has type {cred.get('type')!r}, expected 'payiDatabricksApi'")
+                  f"has type {cred.get('type')!r}, expected 'ascertaDatabricksApi'")
             raise SystemExit(1)
         print(f'  {green("Using")} pinned Databricks credential "{cred.get("name", "?")}" '
               f'(ID: {explicit_id})')
@@ -762,7 +762,7 @@ def resolve_payi_databricks_credential(client: N8nApiClient, args, dry_run: bool
     all_creds = creds_resp.get("data", creds_resp) if isinstance(creds_resp, dict) else creds_resp
     if isinstance(all_creds, dict):
         all_creds = [all_creds]
-    dbx_creds = [c for c in (all_creds or []) if c.get("type") == "payiDatabricksApi"]
+    dbx_creds = [c for c in (all_creds or []) if c.get("type") == "ascertaDatabricksApi"]
 
     if len(dbx_creds) == 1:
         c = dbx_creds[0]
@@ -792,13 +792,13 @@ def resolve_payi_databricks_credential(client: N8nApiClient, args, dry_run: bool
             return {"id": str(c["id"]), "name": c["name"]}
 
     # 0 found — try env vars or prompt
-    pat = os.environ.get("PAYI_DBX_PAT", "").strip()
-    workspace_url = os.environ.get("PAYI_DBX_WORKSPACE_URL", "").strip()
+    pat = os.environ.get("ASCERTA_DBX_PAT", "").strip()
+    workspace_url = os.environ.get("ASCERTA_DBX_WORKSPACE_URL", "").strip()
     auto = getattr(args, "auto_yes", False) or not _is_interactive()
 
     if (not pat or not workspace_url) and auto:
-        print(f"  {yellow('No payiDatabricksApi credential found')}; "
-              f"set both PAYI_DBX_PAT and PAYI_DBX_WORKSPACE_URL to "
+        print(f"  {yellow('No ascertaDatabricksApi credential found')}; "
+              f"set both ASCERTA_DBX_PAT and ASCERTA_DBX_WORKSPACE_URL to "
               f"auto-create, or run interactively. Databricks nodes will be "
               f"migrated without their credential — wire it up manually after.")
         return None
@@ -806,24 +806,24 @@ def resolve_payi_databricks_credential(client: N8nApiClient, args, dry_run: bool
     if not pat or not workspace_url:
         print(f"  {bold('No Databricks credential found — creating one')}")
         if not pat:
-            pat = prompt_value("Databricks Personal Access Token", "PAYI_DBX_PAT", secret=True)
+            pat = prompt_value("Databricks Personal Access Token", "ASCERTA_DBX_PAT", secret=True)
         if not workspace_url:
-            workspace_url = prompt_value("Databricks Workspace URL", "PAYI_DBX_WORKSPACE_URL")
+            workspace_url = prompt_value("Databricks Workspace URL", "ASCERTA_DBX_WORKSPACE_URL")
         if not pat or not workspace_url:
             print(f"  {yellow('Skipping credential creation — missing PAT or workspace URL')}")
             return None
 
     new_cred = client.post("/api/v1/credentials", {
-        "name": "Pay-i Databricks API",
-        "type": "payiDatabricksApi",
+        "name": "Ascerta Databricks API",
+        "type": "ascertaDatabricksApi",
         "data": {
             "accessToken": pat,
             "workspaceUrl": workspace_url,
         },
     })
     cred_id = new_cred.get("id", "?")
-    print(f'  {green("Created")} Databricks credential "Pay-i Databricks API" (ID: {cred_id})')
-    return {"id": str(cred_id), "name": new_cred.get("name", "Pay-i Databricks API")}
+    print(f'  {green("Created")} Databricks credential "Ascerta Databricks API" (ID: {cred_id})')
+    return {"id": str(cred_id), "name": new_cred.get("name", "Ascerta Databricks API")}
 
 
 # ── Provider API Key Collection ──────────────────────────────────────────────
@@ -847,7 +847,7 @@ def _extract_native_credential(original: dict, cred_type: str) -> dict:
     return {}
 
 
-# Maps replacement type → native credential key that the Pay-i node should inherit.
+# Maps replacement type → native credential key that the Ascerta node should inherit.
 NATIVE_CREDENTIAL_KEY = {
     "chat_model": "openAiApi",
     "chat_model_anthropic": "anthropicApi",
@@ -859,13 +859,13 @@ NATIVE_CREDENTIAL_KEY = {
 }
 
 
-def build_payi_chat_model_node(
+def build_ascerta_chat_model_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Chat Model node from a native OpenAI LangChain chat model."""
+    """Build a Ascerta Chat Model node from a native OpenAI LangChain chat model."""
     params = original.get("parameters", {})
 
     # Extract model — newer n8n versions (2.x) store this as a resourceLocator
@@ -885,9 +885,9 @@ def build_payi_chat_model_node(
     native_cred = _extract_native_credential(original, "openAiApi")
 
     credentials = {
-        "payiApi": {
-            "id": str(payi_cred["id"]),
-            "name": payi_cred["name"],
+        "ascertaApi": {
+            "id": str(ascerta_cred["id"]),
+            "name": ascerta_cred["name"],
         },
     }
     if native_cred:
@@ -896,7 +896,7 @@ def build_payi_chat_model_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayi",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -912,13 +912,13 @@ def build_payi_chat_model_node(
     return new_node
 
 
-def build_payi_chat_model_anthropic_node(
+def build_ascerta_chat_model_anthropic_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Anthropic Chat Model node from a native Anthropic LangChain chat model."""
+    """Build a Ascerta Anthropic Chat Model node from a native Anthropic LangChain chat model."""
     params = original.get("parameters", {})
 
     # Native n8n Anthropic node uses "modelName" in some versions, "model" in others
@@ -936,9 +936,9 @@ def build_payi_chat_model_anthropic_node(
     native_cred = _extract_native_credential(original, "anthropicApi")
 
     credentials = {
-        "payiApi": {
-            "id": str(payi_cred["id"]),
-            "name": payi_cred["name"],
+        "ascertaApi": {
+            "id": str(ascerta_cred["id"]),
+            "name": ascerta_cred["name"],
         },
     }
     if native_cred:
@@ -947,7 +947,7 @@ def build_payi_chat_model_anthropic_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayiAnthropic",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -962,13 +962,13 @@ def build_payi_chat_model_anthropic_node(
     return new_node
 
 
-def build_payi_chat_model_azure_node(
+def build_ascerta_chat_model_azure_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Azure OpenAI Chat Model node from a native Azure OpenAI LangChain chat model."""
+    """Build a Ascerta Azure OpenAI Chat Model node from a native Azure OpenAI LangChain chat model."""
     params = original.get("parameters", {})
 
     # Azure uses deployment name instead of model
@@ -989,9 +989,9 @@ def build_payi_chat_model_azure_node(
     native_cred = _extract_native_credential(original, "azureOpenAiApi")
 
     credentials = {
-        "payiApi": {
-            "id": str(payi_cred["id"]),
-            "name": payi_cred["name"],
+        "ascertaApi": {
+            "id": str(ascerta_cred["id"]),
+            "name": ascerta_cred["name"],
         },
     }
     if native_cred:
@@ -1000,7 +1000,7 @@ def build_payi_chat_model_azure_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayiAzure",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaAzure",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -1016,13 +1016,13 @@ def build_payi_chat_model_azure_node(
     return new_node
 
 
-def build_payi_chat_model_bedrock_node(
+def build_ascerta_chat_model_bedrock_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Bedrock Chat Model node from a native AWS Bedrock LangChain chat model."""
+    """Build a Ascerta Bedrock Chat Model node from a native AWS Bedrock LangChain chat model."""
     params = original.get("parameters", {})
 
     model = params.get("model", "")
@@ -1041,9 +1041,9 @@ def build_payi_chat_model_bedrock_node(
     native_cred = _extract_native_credential(original, "aws")
 
     credentials = {
-        "payiApi": {
-            "id": str(payi_cred["id"]),
-            "name": payi_cred["name"],
+        "ascertaApi": {
+            "id": str(ascerta_cred["id"]),
+            "name": ascerta_cred["name"],
         },
     }
     if native_cred:
@@ -1052,7 +1052,7 @@ def build_payi_chat_model_bedrock_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayiBedrock",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaBedrock",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -1068,14 +1068,15 @@ def build_payi_chat_model_bedrock_node(
     return new_node
 
 
-def build_payi_chat_model_databricks_community_node(
+def build_ascerta_chat_model_databricks_community_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
     cloud_provider: str = "aws",
+    dbx_cred=None,
 ) -> dict:
-    """Build a Pay-i Databricks Chat Model node from a Databricks community node.
+    """Build a Ascerta Databricks Chat Model node from a Databricks community node.
 
     cloud_provider defaults to ``aws``. Pass an explicit value (typically the
     ``--databricks-cloud`` CLI flag) when the workspace runs on Azure, GCP, or
@@ -1087,6 +1088,9 @@ def build_payi_chat_model_databricks_community_node(
     endpoint = params.get("endpoint", params.get("endpointName", params.get("model", "")))
     if isinstance(endpoint, dict):
         endpoint = endpoint.get("value", "")
+    deployed_model = params.get("deployedModel", "")
+    if isinstance(deployed_model, dict):
+        deployed_model = deployed_model.get("value", "")
 
     # cloud_provider was supplied by the caller (defaults to "aws"). Community
     # Databricks nodes don't carry a workspace hostname, so the dispatcher
@@ -1098,26 +1102,28 @@ def build_payi_chat_model_databricks_community_node(
         if key in native_options:
             options[key] = native_options[key]
 
-    # Pass through the existing Databricks credential
-    native_cred = _extract_native_credential(original, "databricks")
-
     credentials = {
-        "payiApi": {
-            "id": str(payi_cred["id"]),
-            "name": payi_cred["name"],
+        "ascertaApi": {
+            "id": str(ascerta_cred["id"]),
+            "name": ascerta_cred["name"],
         },
     }
-    if native_cred:
-        credentials["databricks"] = native_cred
+    # The Ascerta node requires its own credential type; a generic
+    # n8n-nodes-databricks credential cannot be attached to it.
+    if dbx_cred:
+        credentials["ascertaDatabricksApi"] = {
+            "id": str(dbx_cred["id"]), "name": dbx_cred["name"],
+        }
 
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayiDatabricks",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
-            "endpointName": endpoint,
+            "endpointName": {"mode": "name", "value": endpoint},
+            "deployedModel": {"mode": "name", "value": deployed_model},
             "cloudProvider": cloud_provider,
             "options": options,
             "useCaseName": "={{ $workflow.name.replaceAll(' ', '-') }}",
@@ -1129,16 +1135,16 @@ def build_payi_chat_model_databricks_community_node(
     return new_node
 
 
-def build_payi_chat_model_databricks_node(
+def build_ascerta_chat_model_databricks_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     dbx_cred,
     cloud_provider: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Databricks Chat Model node from a Databricks-shim
+    """Build a Ascerta Databricks Chat Model node from a Databricks-shim
     OpenAI LangChain chat model. dbx_cred may be None when the user has
-    no payiDatabricksApi credential; the node ships without it and must
+    no ascertaDatabricksApi credential; the node ships without it and must
     be wired up manually in the n8n UI."""
     params = original.get("parameters", {})
 
@@ -1157,10 +1163,10 @@ def build_payi_chat_model_databricks_node(
     }
 
     credentials = {
-        "payiApi": {"id": str(payi_cred["id"]), "name": payi_cred["name"]},
+        "ascertaApi": {"id": str(ascerta_cred["id"]), "name": ascerta_cred["name"]},
     }
     if dbx_cred:
-        credentials["payiDatabricksApi"] = {
+        credentials["ascertaDatabricksApi"] = {
             "id": str(dbx_cred["id"]),
             "name": dbx_cred["name"],
         }
@@ -1168,12 +1174,12 @@ def build_payi_chat_model_databricks_node(
     return {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.lmChatPayiDatabricks",
+        "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaDatabricks",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
             "endpointName": {"mode": "name", "value": model},
-            "deployedModel": "",
+            "deployedModel": {"mode": "name", "value": ""},
             "cloudProvider": cloud_provider,
             "options": options,
             "useCaseName": "={{ $workflow.name.replaceAll(' ', '-') }}",
@@ -1184,13 +1190,13 @@ def build_payi_chat_model_databricks_node(
     }
 
 
-def build_payi_proxy_anthropic_node(
+def build_ascerta_proxy_anthropic_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Proxy node from a native Anthropic app node."""
+    """Build a Ascerta Proxy node from a native Anthropic app node."""
     params = original.get("parameters", {})
 
     model = params.get("model", "claude-sonnet-4-20250514")
@@ -1206,7 +1212,7 @@ def build_payi_proxy_anthropic_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.payi",
+        "type": "@ascerta/n8n-nodes-ascerta.ascerta",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -1223,9 +1229,9 @@ def build_payi_proxy_anthropic_node(
             "debugLogging": False,
         },
         "credentials": {
-            "payiApi": {
-                "id": str(payi_cred["id"]),
-                "name": payi_cred["name"],
+            "ascertaApi": {
+                "id": str(ascerta_cred["id"]),
+                "name": ascerta_cred["name"],
             },
         },
     }
@@ -1234,26 +1240,26 @@ def build_payi_proxy_anthropic_node(
 
 # ── Credential Redirect ──────────────────────────────────────────────────────
 
-# Credential types that support URL redirect (base URL swap to Pay-i proxy).
-# This is the simplest migration: change the URL field, route ALL actions through Pay-i.
+# Credential types that support URL redirect (base URL swap to Ascerta proxy).
+# This is the simplest migration: change the URL field, route ALL actions through Ascerta.
 CREDENTIAL_REDIRECT_CONFIG = {
     "openAiApi": {
         "provider": "openai",
         "url_field": "url",
         "proxy_path": "/api/v1/proxy/openai/v1",
-        "header_field": "xProxy-api-key",  # Pay-i key sent as custom header alongside Bearer token
+        "header_field": "xProxy-api-key",  # Ascerta key sent as custom header alongside Bearer token
     },
     "anthropicApi": {
         "provider": "anthropic",
         "url_field": "url",
         "proxy_path": "/api/v1/proxy/anthropic",
-        "header_field": "xProxy-api-key",  # Pay-i key sent as custom header
+        "header_field": "xProxy-api-key",  # Ascerta key sent as custom header
     },
     "azureOpenAiApi": {
         "provider": "azureOpenai",
         "url_field": "endpoint",
         "proxy_path": "/api/v1/proxy/azure.openai",
-        "header_field": "xProxy-api-key",  # Pay-i key sent as custom header
+        "header_field": "xProxy-api-key",  # Ascerta key sent as custom header
     },
 }
 
@@ -1271,9 +1277,9 @@ def _fetch_credential_data(client, cred_id: str) -> dict:
         return {}
 
 
-def build_credential_patch(cred_type: str, payi_base_url: str, payi_api_key: str,
+def build_credential_patch(cred_type: str, ascerta_base_url: str, ascerta_api_key: str,
                            existing_data: dict = None) -> dict:
-    """Build the PATCH body to redirect a credential to Pay-i proxy.
+    """Build the PATCH body to redirect a credential to Ascerta proxy.
 
     When *existing_data* is provided (fetched from n8n), the redirect fields are
     merged into the full credential data so n8n's PATCH validation passes.
@@ -1284,7 +1290,7 @@ def build_credential_patch(cred_type: str, payi_base_url: str, payi_api_key: str
     if not config:
         return {}
 
-    base = payi_base_url.rstrip("/")
+    base = ascerta_base_url.rstrip("/")
     proxy_url = f"{base}{config['proxy_path']}"
 
     # Start from existing data if available, otherwise from scratch
@@ -1294,7 +1300,7 @@ def build_credential_patch(cred_type: str, payi_base_url: str, payi_api_key: str
     data[config["url_field"]] = proxy_url
     if config.get("header_field"):
         data["headerName"] = config["header_field"]
-        data["headerValue"] = payi_api_key
+        data["headerValue"] = ascerta_api_key
 
     return {"data": data}
 
@@ -1341,13 +1347,13 @@ def find_redirectable_credentials(client, workflows: list) -> list:
     return redirectable
 
 
-def build_payi_proxy_node(
+def build_ascerta_proxy_node(
     original: dict,
-    payi_cred: dict,
+    ascerta_cred: dict,
     provider_key: str,
     new_name: str,
 ) -> dict:
-    """Build a Pay-i Proxy node from a native OpenAI app node."""
+    """Build a Ascerta Proxy node from a native OpenAI app node."""
     params = original.get("parameters", {})
 
     # The native OpenAI node uses 'model' — newer n8n versions (2.x) store
@@ -1381,7 +1387,7 @@ def build_payi_proxy_node(
     new_node = {
         "id": original.get("id", ""),
         "name": new_name,
-        "type": "n8n-nodes-payi.payi",
+        "type": "@ascerta/n8n-nodes-ascerta.ascerta",
         "typeVersion": 1,
         "position": original.get("position", [0, 0]),
         "parameters": {
@@ -1399,9 +1405,9 @@ def build_payi_proxy_node(
             "debugLogging": False,
         },
         "credentials": {
-            "payiApi": {
-                "id": str(payi_cred["id"]),
-                "name": payi_cred["name"],
+            "ascertaApi": {
+                "id": str(ascerta_cred["id"]),
+                "name": ascerta_cred["name"],
             },
         },
     }
@@ -1502,13 +1508,13 @@ def filter_workflow_for_update(workflow: dict) -> dict:
 # ── Interactive Selection ────────────────────────────────────────────────────
 
 REPLACEMENT_LABELS = {
-    "chat_model": "Pay-i Chat Model",
-    "chat_model_anthropic": "Pay-i Anthropic Chat Model",
-    "chat_model_azure": "Pay-i Azure OpenAI Chat Model",
-    "chat_model_bedrock": "Pay-i Bedrock Chat Model",
-    "chat_model_databricks": "Pay-i Databricks Chat Model",
-    "proxy": "Pay-i Proxy",
-    "proxy_anthropic": "Pay-i Proxy (Anthropic)",
+    "chat_model": "Ascerta Chat Model",
+    "chat_model_anthropic": "Ascerta Anthropic Chat Model",
+    "chat_model_azure": "Ascerta Azure OpenAI Chat Model",
+    "chat_model_bedrock": "Ascerta Bedrock Chat Model",
+    "chat_model_databricks": "Ascerta Databricks Chat Model",
+    "proxy": "Ascerta Proxy",
+    "proxy_anthropic": "Ascerta Proxy (Anthropic)",
 }
 
 
@@ -1590,7 +1596,7 @@ def prompt_migration_strategy(found: list, redirectable_creds: list) -> str:
 
     if has_redirectable:
         print(f"  {bold('[1]')} Credential Redirect {green('(recommended)')}")
-        print(f"      Change API endpoint URLs to route ALL actions through Pay-i proxy.")
+        print(f"      Change API endpoint URLs to route ALL actions through Ascerta proxy.")
         print(f"      Fastest approach — covers every endpoint for each credential.")
         cred_names = ", ".join(f"{c['name']} ({c['type']})" for c in redirectable_creds)
         print(f"      Credentials: {dim(cred_names)}")
@@ -1598,7 +1604,7 @@ def prompt_migration_strategy(found: list, redirectable_creds: list) -> str:
 
     if has_migratable:
         print(f"  {bold('[2]')} Node Replacement {dim('(full tracking)')}")
-        print(f"      Replace Chat Model nodes with Pay-i equivalents.")
+        print(f"      Replace Chat Model nodes with Ascerta equivalents.")
         print(f"      Adds full tracking headers (use case, user ID, limits).")
         print()
 
@@ -1639,7 +1645,7 @@ def prompt_select_nodes(found: list) -> list:
         if n["feasible"]:
             tag = green("MIGRATABLE")
             migratable_indices.append(i)
-            replacement = REPLACEMENT_LABELS.get(n["replacement"], "Pay-i Node")
+            replacement = REPLACEMENT_LABELS.get(n["replacement"], "Ascerta Node")
             detail = dim(f"-> {replacement}")
         else:
             tag = yellow("SKIP")
@@ -1684,15 +1690,15 @@ def prompt_select_nodes(found: list) -> list:
 def print_banner():
     print()
     print(bold("=" * 62))
-    print(bold("  Pay-i Workflow Migration"))
+    print(bold("  Ascerta Workflow Migration"))
     print(bold("=" * 62))
     print()
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
-def execute_credential_redirect(client, redirectable_creds: list, payi_base: str, payi_key: str, dry_run: bool = False) -> int:
-    """Redirect credentials to Pay-i proxy URLs. Returns count of redirected.
+def execute_credential_redirect(client, redirectable_creds: list, ascerta_base: str, ascerta_key: str, dry_run: bool = False) -> int:
+    """Redirect credentials to Ascerta proxy URLs. Returns count of redirected.
 
     n8n's PATCH endpoint requires ALL credential fields (including apiKey).
     We first fetch the existing credential data via ``?includeData=true``,
@@ -1704,7 +1710,7 @@ def execute_credential_redirect(client, redirectable_creds: list, payi_base: str
         if not config:
             continue
 
-        base = payi_base.rstrip("/")
+        base = ascerta_base.rstrip("/")
         proxy_url = f"{base}{config['proxy_path']}"
 
         if dry_run:
@@ -1720,7 +1726,7 @@ def execute_credential_redirect(client, redirectable_creds: list, payi_base: str
             print(f'           (Ensure n8n API supports includeData, or update credentials manually)')
             continue
 
-        patch = build_credential_patch(cred["type"], payi_base, payi_key,
+        patch = build_credential_patch(cred["type"], ascerta_base, ascerta_key,
                                        existing_data=existing_data)
         if not patch:
             continue
@@ -1735,7 +1741,7 @@ def execute_credential_redirect(client, redirectable_creds: list, payi_base: str
     return redirected
 
 
-def execute_node_replacement(client, selected: list, workflows: list, payi_cred: dict,
+def execute_node_replacement(client, selected: list, workflows: list, ascerta_cred: dict,
                              provider_creds: dict, dry_run: bool = False, workflow_filter: str = None,
                              verbose: bool = False, dbx_cred=None) -> tuple:
     """Replace nodes in workflows. Returns (migrated_count, skipped_count)."""
@@ -1779,7 +1785,7 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
             cred_val = provider_creds.get(provider, "") if provider_creds else ""
 
             replacement_type = node_info["replacement"]
-            replacement_label = REPLACEMENT_LABELS.get(replacement_type, "Pay-i Node")
+            replacement_label = REPLACEMENT_LABELS.get(replacement_type, "Ascerta Node")
             desired_name = replacement_label
             new_name = unique_node_name(desired_name, existing_names - {old_name})
 
@@ -1790,13 +1796,13 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
             # or (b) an lmChatOpenAi shim that find_llm_nodes reclassified — those
             # entries carry a "databricks_shim" key and use the shim builder.
             builder_map = {
-                "chat_model": build_payi_chat_model_node,
-                "chat_model_anthropic": build_payi_chat_model_anthropic_node,
-                "chat_model_azure": build_payi_chat_model_azure_node,
-                "chat_model_bedrock": build_payi_chat_model_bedrock_node,
-                "chat_model_databricks": build_payi_chat_model_databricks_node,  # placeholder; routed below
-                "proxy": build_payi_proxy_node,
-                "proxy_anthropic": build_payi_proxy_anthropic_node,
+                "chat_model": build_ascerta_chat_model_node,
+                "chat_model_anthropic": build_ascerta_chat_model_anthropic_node,
+                "chat_model_azure": build_ascerta_chat_model_azure_node,
+                "chat_model_bedrock": build_ascerta_chat_model_bedrock_node,
+                "chat_model_databricks": build_ascerta_chat_model_databricks_node,  # placeholder; routed below
+                "proxy": build_ascerta_proxy_node,
+                "proxy_anthropic": build_ascerta_proxy_anthropic_node,
             }
             builder = builder_map.get(replacement_type)
             if not builder:
@@ -1815,17 +1821,18 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
                     cloud = shim.get("cloud_provider") or "aws"
                     if cloud == "aws" and cloud_override:
                         cloud = cloud_override
-                    new_node = build_payi_chat_model_databricks_node(
-                        node, payi_cred, dbx_cred, cloud, new_name,
+                    new_node = build_ascerta_chat_model_databricks_node(
+                        node, ascerta_cred, dbx_cred, cloud, new_name,
                     )
                 else:
                     # Community-node path: n8n-nodes-databricks.* in NATIVE_LLM_NODES.
-                    new_node = build_payi_chat_model_databricks_community_node(
-                        node, payi_cred, cred_val, new_name,
+                    new_node = build_ascerta_chat_model_databricks_community_node(
+                        node, ascerta_cred, cred_val, new_name,
                         cloud_provider=cloud_override or "aws",
+                        dbx_cred=dbx_cred,
                     )
             else:
-                new_node = builder(node, payi_cred, cred_val, new_name)
+                new_node = builder(node, ascerta_cred, cred_val, new_name)
 
             # Log credential passthrough details in verbose mode
             if verbose:
@@ -1870,7 +1877,7 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
             # Update the original workflow with migrated nodes and new name
             workflow["nodes"] = nodes
             workflow["connections"] = connections
-            workflow["name"] = f"{original_workflow_snapshot.get('name', 'Untitled')} (Pay-i)"
+            workflow["name"] = f"{original_workflow_snapshot.get('name', 'Untitled')} (Ascerta)"
             update_body = filter_workflow_for_update(workflow)
             put_resp = client.put(f"/api/v1/workflows/{wf_id}", update_body)
             print(f'    {green("Saved")} as "{workflow["name"]}"')
@@ -1880,7 +1887,7 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
             saved_nodes = put_resp.get("nodes", [])
             cred_warnings = []
             for sn in saved_nodes:
-                if sn.get("type", "").startswith("n8n-nodes-payi."):
+                if sn.get("type", "").startswith("@ascerta/n8n-nodes-ascerta."):
                     saved_creds = sn.get("credentials", {})
                     if not saved_creds:
                         cred_warnings.append(sn.get("name", "?"))
@@ -1889,7 +1896,7 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
             if cred_warnings:
                 print(f'    {yellow("WARNING")}: Credentials NOT saved for: {", ".join(cred_warnings)}')
                 print(f'           Open each node in n8n and select the credentials manually.')
-                print(f'           (This can happen if n8n hasn\'t loaded the Pay-i community node; try restarting n8n.)')
+                print(f'           (This can happen if n8n hasn\'t loaded the Ascerta community node; try restarting n8n.)')
 
         print()
 
@@ -1898,7 +1905,7 @@ def execute_node_replacement(client, selected: list, workflows: list, payi_cred:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Migrate n8n workflows from native LLM nodes to Pay-i nodes",
+        description="Migrate n8n workflows from native LLM nodes to Ascerta nodes",
     )
     parser.add_argument("--dry-run", action="store_true",
                         help="Show what would change without modifying anything")
@@ -1911,11 +1918,11 @@ def main():
     parser.add_argument("--strategy", choices=["redirect", "replace", "both"],
                         help="Migration strategy (skip interactive prompt)")
     parser.add_argument("--databricks-cloud",
-                        choices=["aws", "azure", "google", "databricks"],
+                        choices=["aws", "azure", "google"],
                         default="aws",
                         help="Default cloud for ambiguous *.cloud.databricks.com hostnames in non-interactive mode")
     parser.add_argument("--databricks-credential-id", metavar="ID",
-                        help="Pin a specific payiDatabricksApi credential ID; skips discovery")
+                        help="Pin a specific ascertaDatabricksApi credential ID; skips discovery")
     args = parser.parse_args()
 
     print_banner()
@@ -1925,28 +1932,28 @@ def main():
     print()
 
     # Check if all env vars are present (CI/non-interactive mode)
-    env_vars_present = all(os.environ.get(v) for v in ["N8N_BASE_URL", "N8N_API_KEY", "PAYI_BASE_URL", "PAYI_API_KEY"])
+    env_vars_present = all(os.environ.get(v) for v in ["N8N_BASE_URL", "N8N_API_KEY", "ASCERTA_BASE_URL", "ASCERTA_API_KEY"])
 
     if env_vars_present:
         n8n_base = os.environ["N8N_BASE_URL"].rstrip("/")
         n8n_key = os.environ["N8N_API_KEY"]
-        payi_base = os.environ["PAYI_BASE_URL"].rstrip("/")
-        payi_key = os.environ["PAYI_API_KEY"]
+        ascerta_base = os.environ["ASCERTA_BASE_URL"].rstrip("/")
+        ascerta_key = os.environ["ASCERTA_API_KEY"]
         print(f"  {green('Using environment variables')}")
     elif _is_interactive():
         details = setup_connection_details(args)
         n8n_base = details["n8n_base"]
         n8n_key = details["n8n_key"]
-        payi_base = details["payi_base"]
-        payi_key = details["payi_key"]
+        ascerta_base = details["ascerta_base"]
+        ascerta_key = details["ascerta_key"]
     else:
         print(f"{red('ERROR')}: Missing environment variables (non-interactive mode).")
-        print("  Set: N8N_BASE_URL, N8N_API_KEY, PAYI_BASE_URL, PAYI_API_KEY")
+        print("  Set: N8N_BASE_URL, N8N_API_KEY, ASCERTA_BASE_URL, ASCERTA_API_KEY")
         return 1
 
     print()
     print(f"  n8n instance:  {cyan(n8n_base)}")
-    print(f"  Pay-i base:    {cyan(payi_base)}")
+    print(f"  Ascerta base:    {cyan(ascerta_base)}")
     if args.dry_run:
         print(f"  Mode:          {yellow('DRY RUN')} (no changes will be made)")
     print()
@@ -1992,7 +1999,7 @@ def main():
     found = find_llm_nodes(workflows, client=client)
     # Collect credential IDs used by Databricks-shim nodes — these point at a
     # Databricks workspace, not OpenAI, so they must NOT be redirected through
-    # Pay-i's OpenAI proxy path. Filter them out of the redirect set.
+    # Ascerta's OpenAI proxy path. Filter them out of the redirect set.
     # Normalize IDs to str — n8n versions vary between int and str.
     shim_cred_ids = {
         str(c["id"])
@@ -2032,7 +2039,7 @@ def main():
             print(f"      Reason:   {dbx['reason']}")
         print()
         print(f"  {yellow('Note:')} These {len(databricks_nodes)} node(s) use non-standard Databricks")
-        print(f"  types and require manual replacement with Pay-i Databricks (Proxy).")
+        print(f"  types and require manual replacement with Ascerta Databricks (Proxy).")
         print()
 
     if found:
@@ -2063,11 +2070,11 @@ def main():
     print(bold("  Step 4: Credentials"))
     print()
 
-    payi_cred = {"id": "dry-run", "name": "Pay-i API (dry run)"}
+    ascerta_cred = {"id": "dry-run", "name": "Ascerta API (dry run)"}
     provider_creds = {}
 
     if not dry_run and do_replace:
-        payi_cred = ensure_payi_credential(client, payi_key, payi_base)
+        ascerta_cred = ensure_ascerta_credential(client, ascerta_key, ascerta_base)
         print()
 
     if do_replace:
@@ -2078,7 +2085,7 @@ def main():
 
         if not dry_run and selected:
             # Chat model nodes use credential passthrough (the existing provider
-            # credential is copied to the Pay-i node) — no API key needed.
+            # credential is copied to the Ascerta node) — no API key needed.
             # Proxy nodes still need provider API keys as node parameters.
             proxy_nodes = [n for n in selected if n.get("replacement", "").startswith("proxy")]
             if proxy_nodes:
@@ -2092,7 +2099,7 @@ def main():
 
     dbx_cred = None
     if do_replace and any(n.get("replacement") == "chat_model_databricks" for n in selected):
-        dbx_cred = resolve_payi_databricks_credential(client, args, dry_run=dry_run)
+        dbx_cred = resolve_ascerta_databricks_credential(client, args, dry_run=dry_run)
         # Stash the cloud override on the client for builder dispatch.
         setattr(client, "_databricks_cloud_override",
                 args.databricks_cloud if args.databricks_cloud != "aws" else None)
@@ -2110,7 +2117,7 @@ def main():
     if do_redirect and redirectable_creds:
         print(bold("  Credential Redirects:"))
         print()
-        creds_redirected = execute_credential_redirect(client, redirectable_creds, payi_base, payi_key, dry_run=dry_run)
+        creds_redirected = execute_credential_redirect(client, redirectable_creds, ascerta_base, ascerta_key, dry_run=dry_run)
         print()
 
     # Node replacement
@@ -2118,7 +2125,7 @@ def main():
         print(bold("  Node Replacements:"))
         print()
         nodes_migrated, nodes_skipped = execute_node_replacement(
-            client, selected, workflows, payi_cred, provider_creds,
+            client, selected, workflows, ascerta_cred, provider_creds,
             dry_run=dry_run, workflow_filter=args.workflow, verbose=args.verbose,
             dbx_cred=dbx_cred,
         )

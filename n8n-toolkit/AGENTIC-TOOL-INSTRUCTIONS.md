@@ -9,13 +9,13 @@ this is the canonical project context. Symlink or copy as needed.
 
 ## What this project is
 
-The `n8n-toolkit/` directory (part of the `payi-utilities` monorepo)
+The `n8n-toolkit/` directory (part of the `utilities` repository)
 contains Python CLI scripts that audit and migrate
 [n8n](https://n8n.io) workflows to route their LLM calls through
-[Pay-i](https://pay-i.com) for cost tracking and budget enforcement.
+[Ascerta](https://ascerta.com) for cost tracking and budget enforcement.
 
-The toolkit pairs with [n8n-nodes-payi](https://github.com/pay-i/n8n-nodes-payi),
-the community node package that exposes Pay-i to n8n workflows.
+The toolkit pairs with [@ascerta/n8n-nodes-ascerta](https://github.com/ascerta-dev/n8n-nodes-ascerta),
+the community node package that exposes Ascerta to n8n workflows.
 
 ## Stack
 
@@ -31,9 +31,9 @@ the community node package that exposes Pay-i to n8n workflows.
 
 | Path | Purpose |
 |---|---|
-| `audit-configure-payi-proxy.py` | Read-only audit of n8n workflows. Emits JSON or Markdown reports. Optionally redirects supported credentials to Pay-i. |
-| `migrate-workflows-to-payi.py` | Interactive migration. Replaces native LLM nodes with Pay-i equivalents, redirects credentials, or both. |
-| `migrate-to-payi.sh`, `migrate-openai-to-payi.sh` | Shell-based credential redirect for OpenAI / Anthropic / Azure OpenAI. Predates the Python tooling; kept for backward compatibility. |
+| `audit-configure-ascerta-proxy.py` | Read-only audit of n8n workflows. Emits JSON or Markdown reports. Optionally redirects supported credentials to Ascerta. |
+| `migrate-workflows-to-ascerta.py` | Interactive migration. Replaces native LLM nodes with Ascerta equivalents, redirects credentials, or both. |
+| `migrate-to-ascerta.sh`, `migrate-openai-to-ascerta.sh` | Shell-based credential redirect for OpenAI / Anthropic / Azure OpenAI. Predates the Python tooling; kept for backward compatibility. |
 | `test_migrate_workflows.py` | Test suite. Covers both Python scripts. |
 | `test-workflow-*.json`, `sample-workflow-*.json` | Workflow fixtures used by tests. |
 | `docs/` | User-facing documentation. |
@@ -48,21 +48,21 @@ python3 -m pytest test_migrate_workflows.py -q
 # Audit an n8n instance (read-only, no changes)
 N8N_BASE_URL=http://localhost:5678 \
 N8N_API_KEY=your-n8n-key \
-python3 audit-configure-payi-proxy.py --out audit.json
+python3 audit-configure-ascerta-proxy.py --out audit.json
 
 # Render a Markdown report from saved JSON
-python3 audit-configure-payi-proxy.py \
+python3 audit-configure-ascerta-proxy.py \
   --from-json audit.json --report-format md --out audit.md
 
 # Migrate workflows (always dry-run first)
 N8N_BASE_URL=http://localhost:5678 \
 N8N_API_KEY=your-n8n-key \
-PAYI_BASE_URL=https://api.pay-i.com \
-PAYI_API_KEY=your-payi-key \
-python3 migrate-workflows-to-payi.py --dry-run
+ASCERTA_BASE_URL=https://api.ascerta.com \
+ASCERTA_API_KEY=your-ascerta-key \
+python3 migrate-workflows-to-ascerta.py --dry-run
 
 # Apply the migration once dry-run looks correct
-python3 migrate-workflows-to-payi.py
+python3 migrate-workflows-to-ascerta.py
 ```
 
 Both scripts honor environment variables and prompt interactively when
@@ -76,21 +76,21 @@ justification.
 - **Stdlib only.** Both Python scripts are designed to run on a stock
   Python install with no `pip install` step. New dependencies require
   a deliberate trade-off discussion, not a casual addition.
-- **Single-file CLIs.** `audit-configure-payi-proxy.py` and
-  `migrate-workflows-to-payi.py` are intentionally not modularized
+- **Single-file CLIs.** `audit-configure-ascerta-proxy.py` and
+  `migrate-workflows-to-ascerta.py` are intentionally not modularized
   into packages. Each is a self-contained tool.
 - **No shared module between the two scripts.** Some logic is
   duplicated (e.g. node type tables) on purpose. Extract a shared
   module only when a third caller needs the same code — not before.
 - **Credential passthrough for chat-model replacements.** When the
   migrator replaces a native chat-model node (OpenAI, Anthropic,
-  Azure, Bedrock) with the Pay-i equivalent, the existing provider
+  Azure, Bedrock) with the Ascerta equivalent, the existing provider
   credential is copied onto the new node. The user does not re-enter
-  API keys. Exception: the Pay-i Databricks node uses
-  `payiDatabricksApi`, which has no native equivalent and must be
+  API keys. Exception: the Ascerta Databricks node uses
+  `ascertaDatabricksApi`, which has no native equivalent and must be
   resolved separately.
 - **Source-of-truth dictionaries.** `NATIVE_LLM_NODES` (migrator)
-  and `NATIVE_NODE_TYPES` / `PAYI_NODE_TYPES` (audit) define
+  and `NATIVE_NODE_TYPES` / `ASCERTA_NODE_TYPES` (audit) define
   everything the toolkit understands. Adding support for a new
   upstream node means adding entries to those dicts plus a `build_*`
   function. This is the extension point.
@@ -150,20 +150,20 @@ See `.env.example` for the full list. The most common:
 |---|---|
 | `N8N_BASE_URL` | URL of the n8n instance to operate on |
 | `N8N_API_KEY` | n8n API key (Settings → API → Create API Key) |
-| `PAYI_BASE_URL` | Pay-i endpoint, defaults to `https://api.pay-i.com` |
-| `PAYI_API_KEY` | Pay-i API key |
+| `ASCERTA_BASE_URL` | Ascerta endpoint, defaults to `https://api.ascerta.com` |
+| `ASCERTA_API_KEY` | Ascerta API key |
 
 Provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, etc.) are only
-needed when migrating App-style nodes to Pay-i Proxy. Chat-model
+needed when migrating App-style nodes to Ascerta Proxy. Chat-model
 migrations inherit credentials from the source node automatically.
 
 ## Related projects
 
-- [n8n-nodes-payi](https://github.com/pay-i/n8n-nodes-payi) — Pay-i
+- [@ascerta/n8n-nodes-ascerta](https://github.com/ascerta-dev/n8n-nodes-ascerta) — Ascerta
   community node package. Installed inside the user's n8n instance.
   This toolkit migrates n8n workflows to use those nodes.
 - [n8n](https://n8n.io) — the workflow automation platform.
-- [Pay-i](https://pay-i.com) — the AI cost management platform this
+- [Ascerta](https://ascerta.com) — the AI cost management platform this
   toolkit routes workflows through.
 
 ## License
