@@ -22,7 +22,7 @@ This toolkit uses only the Python standard library. There are no third-party run
 | `ssl` | TLS context for `--insecure` mode |
 | `sys` | Exit codes and stdout/stderr |
 | `unittest` | Test framework |
-| `urllib.request` / `urllib.error` | HTTP calls to n8n and Pay-i APIs |
+| `urllib.request` / `urllib.error` | HTTP calls to n8n and Ascerta APIs |
 | `urllib.parse` | Hostname extraction for Databricks shim detection |
 
 ## Dev/Test Dependencies
@@ -37,12 +37,12 @@ This toolkit uses only the Python standard library. There are no third-party run
 | Service | Provider | Purpose |
 |---------|----------|---------|
 | n8n REST API | Self-hosted | Workflow and credential read/write |
-| Pay-i API | Pay-i | Proxy endpoint for credential redirect |
+| Ascerta API | Ascerta | Proxy endpoint for credential redirect |
 
 ## Companion Package
 
 | Package | Version | License | Purpose |
 |---------|---------|---------|---------|
-| [n8n-nodes-payi](https://github.com/Pay-i/n8n-nodes-payi) | >=0.3.0 | MIT | Pay-i community nodes for n8n (required for node replacement strategy) |
+| [@ascerta/n8n-nodes-ascerta](https://github.com/ascerta-dev/n8n-nodes-ascerta) | >=1.0.0 | MIT | Ascerta community nodes for n8n (required for node replacement strategy) |
 
 Last updated: 2026-05-21

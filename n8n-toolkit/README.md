@@ -1,11 +1,11 @@
 # n8n-toolkit
 
 Audit and migrate [n8n](https://n8n.io) AI workflows to route their LLM
-calls through [Pay-i](https://pay-i.com) for cost tracking and budget
+calls through [Ascerta](https://ascerta.com) for cost tracking and budget
 enforcement.
 
-Companion to [n8n-nodes-payi](https://github.com/pay-i/n8n-nodes-payi),
-the community node package that exposes Pay-i to n8n workflows.
+Companion to [@ascerta/n8n-nodes-ascerta](https://github.com/ascerta-dev/n8n-nodes-ascerta),
+the community node package that exposes Ascerta to n8n workflows.
 
 ## What it does
 
@@ -13,9 +13,9 @@ the community node package that exposes Pay-i to n8n workflows.
   Bedrock, Databricks) are used across your n8n workflows
 - Generate JSON and Markdown migration plans
 - Detect Databricks workspaces accessed through OpenAI-compatible
-  shims and route them correctly to the Pay-i Databricks node
-- Redirect supported credentials to Pay-i proxy URLs
-- Replace native LLM nodes with Pay-i equivalents, with credential
+  shims and route them correctly to the Ascerta Databricks node
+- Redirect supported credentials to Ascerta proxy URLs
+- Replace native LLM nodes with Ascerta equivalents, with credential
   passthrough so you don't re-enter API keys
 
 ## Documentation
@@ -38,10 +38,10 @@ Full documentation lives in [`docs/`](./docs/README.md). Start there.
 
 | Script | Purpose |
 |---|---|
-| `audit-configure-payi-proxy.py` | Read workflows, analyze providers and actions, probe credential redirect capability, emit JSON/Markdown reports, optionally patch redirectable credentials |
-| `migrate-workflows-to-payi.py` | Interactive migration with strategy selection (`redirect`, `replace`, `both`) |
-| `migrate-to-payi.sh` | Credential redirect for OpenAI, Anthropic, Azure OpenAI |
-| `migrate-openai-to-payi.sh` | Credential redirect for OpenAI only |
+| `audit-configure-ascerta-proxy.py` | Read workflows, analyze providers and actions, probe credential redirect capability, emit JSON/Markdown reports, optionally patch redirectable credentials |
+| `migrate-workflows-to-ascerta.py` | Interactive migration with strategy selection (`redirect`, `replace`, `both`) |
+| `migrate-to-ascerta.sh` | Credential redirect for OpenAI, Anthropic, Azure OpenAI |
+| `migrate-openai-to-ascerta.sh` | Credential redirect for OpenAI only |
 
 ## Quick start
 
@@ -52,21 +52,21 @@ step required.
 # Set environment variables (or use a .env file — see .env.example)
 export N8N_BASE_URL=http://localhost:5678
 export N8N_API_KEY=your-n8n-api-key
-export PAYI_BASE_URL=https://api.pay-i.com
-export PAYI_API_KEY=your-payi-api-key
+export ASCERTA_BASE_URL=https://api.ascerta.com
+export ASCERTA_API_KEY=your-ascerta-api-key
 
 # Audit (read-only)
-python3 audit-configure-payi-proxy.py --out audit.json
+python3 audit-configure-ascerta-proxy.py --out audit.json
 
 # Render the audit as Markdown
-python3 audit-configure-payi-proxy.py \
+python3 audit-configure-ascerta-proxy.py \
   --from-json audit.json --report-format md --out audit.md
 
 # Migrate (always dry-run first)
-python3 migrate-workflows-to-payi.py --dry-run
+python3 migrate-workflows-to-ascerta.py --dry-run
 
 # Apply the migration once dry-run looks correct
-python3 migrate-workflows-to-payi.py
+python3 migrate-workflows-to-ascerta.py
 ```
 
 See [`.env.example`](./.env.example) for the full list of supported
@@ -77,16 +77,16 @@ environment variables.
 The toolkit detects Databricks workspaces accessed via the OpenAI
 compatibility shim (`lmChatOpenAi` nodes whose `options.baseURL`
 points at `*.azuredatabricks.net` or `*.cloud.databricks.com`) and
-migrates them to the Pay-i Databricks node with the correct
+migrates them to the Ascerta Databricks node with the correct
 `cloudProvider` setting.
 
 For ambiguous `*.cloud.databricks.com` hostnames the migrator defaults
 to `aws` and prompts you to confirm or override. In non-interactive
-mode, use `--databricks-cloud {aws,google,databricks}`.
+mode, use `--databricks-cloud {aws,azure,google}`.
 
-If you already have a `payiDatabricksApi` credential in n8n, the
+If you already have a `ascertaDatabricksApi` credential in n8n, the
 migrator reuses it. If not, it prompts to create one (or reads
-`PAYI_DBX_PAT` and `PAYI_DBX_WORKSPACE_URL` for non-interactive
+`ASCERTA_DBX_PAT` and `ASCERTA_DBX_WORKSPACE_URL` for non-interactive
 provisioning).
 
 ## Notes
@@ -96,7 +96,7 @@ provisioning).
 - For CI and pipelines, set environment variables and use
   `--auto-yes`. See `.env.example`.
 - Provider support depends on both this toolkit and the installed
-  `n8n-nodes-payi` version.
+  `@ascerta/n8n-nodes-ascerta` version.
 
 ## Container
 
@@ -108,10 +108,10 @@ docker build -t n8n-toolkit .
 mkdir -p reports
 docker run --rm \
   -e N8N_BASE_URL -e N8N_API_KEY \
-  -e PAYI_BASE_URL -e PAYI_API_KEY \
+  -e ASCERTA_BASE_URL -e ASCERTA_API_KEY \
   -v "$(pwd)/reports:/reports" \
   n8n-toolkit \
-  audit-configure-payi-proxy.py --out /reports/audit.json
+  audit-configure-ascerta-proxy.py --out /reports/audit.json
 ```
 
 The audit JSON lands in `./reports/audit.json` on the host.

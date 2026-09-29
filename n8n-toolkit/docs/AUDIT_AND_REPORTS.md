@@ -2,7 +2,7 @@
 
 > **[Back to Documentation Index](./README.md)**
 
-`audit-configure-payi-proxy.py` supports both machine-readable and human-readable reporting.
+`audit-configure-ascerta-proxy.py` supports both machine-readable and human-readable reporting.
 
 ## Report Types
 
@@ -14,7 +14,7 @@
 ## Programmatic JSON Report
 
 ```bash
-python3 audit-configure-payi-proxy.py --out ./audit.json
+python3 audit-configure-ascerta-proxy.py --out ./audit.json
 ```
 
 Primary sections:
@@ -28,7 +28,7 @@ Primary sections:
 From a live audit:
 
 ```bash
-python3 audit-configure-payi-proxy.py \
+python3 audit-configure-ascerta-proxy.py \
   --report-format md \
   --out ./audit.md
 ```
@@ -36,7 +36,7 @@ python3 audit-configure-payi-proxy.py \
 From an existing JSON report:
 
 ```bash
-python3 audit-configure-payi-proxy.py \
+python3 audit-configure-ascerta-proxy.py \
   --from-json ./audit.json \
   --report-format md \
   --out ./audit.md
@@ -59,10 +59,10 @@ This gives deterministic machine input plus review evidence for compliance.
 
 ## Migration Manifest Paths
 
-- `already_on_payi`
+- `already_on_ascerta`
 - `credential_redirect`
 - `verify_then_redirect`
-- `replace_with_payi_proxy`
+- `replace_with_ascerta_proxy`
 - `manual_required`
 
 ## Optional Apply Mode
@@ -72,19 +72,19 @@ The audit tool can also patch redirectable credentials.
 Preview what would be patched (no changes applied):
 
 ```bash
-python3 audit-configure-payi-proxy.py --configure-credentials --dry-run
+python3 audit-configure-ascerta-proxy.py --configure-credentials --dry-run
 ```
 
 Apply with interactive confirmation:
 
 ```bash
-python3 audit-configure-payi-proxy.py --configure-credentials
+python3 audit-configure-ascerta-proxy.py --configure-credentials
 ```
 
 Apply with confirmation skip (for CI/automation):
 
 ```bash
-python3 audit-configure-payi-proxy.py --configure-credentials --yes
+python3 audit-configure-ascerta-proxy.py --configure-credentials --yes
 ```
 
 Recommended: run report-only first, then `--dry-run`, then apply with explicit review.

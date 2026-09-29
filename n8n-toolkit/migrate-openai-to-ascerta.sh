@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 #
-# migrate-openai-to-payi.sh
+# migrate-openai-to-ascerta.sh
 #
-# Redirects existing n8n OpenAI credentials to route through Pay-i proxy.
+# Redirects existing n8n OpenAI credentials to route through Ascerta proxy.
 # Uses the n8n REST API — works on both self-hosted and cloud instances.
 #
 # Usage:
-#   ./migrate-openai-to-payi.sh
+#   ./migrate-openai-to-ascerta.sh
 #
 # Required environment variables:
 #   N8N_BASE_URL    - Your n8n instance URL (e.g. http://localhost:5678 or https://yourname.app.n8n.cloud)
 #   N8N_API_KEY     - Your n8n API key (Settings > API > Create API Key)
-#   PAYI_BASE_URL   - Your Pay-i instance URL (e.g. https://api.yourcompany.pay-i.com)
-#   PAYI_API_KEY    - Your Pay-i API key (optional — prints reminder if not set)
+#   ASCERTA_BASE_URL   - Your Ascerta instance URL (e.g. https://api.yourcompany.ascerta.com)
+#   ASCERTA_API_KEY    - Your Ascerta API key (optional — prints reminder if not set)
 #
 # What it does:
 #   1. Lists all credentials in your n8n instance
 #   2. Finds OpenAI credentials (type: openAiApi)
 #   3. Shows current base URL for each
 #   4. Asks for confirmation before updating
-#   5. Updates the base URL to: {PAYI_BASE_URL}/api/v1/proxy/openai/v1
+#   5. Updates the base URL to: {ASCERTA_BASE_URL}/api/v1/proxy/openai/v1
 #
 # To revert:
-#   Set PAYI_BASE_URL=https://api.openai.com and re-run the script,
+#   Set ASCERTA_BASE_URL=https://api.openai.com and re-run the script,
 #   or manually edit each credential in the n8n UI.
 #
 
@@ -43,30 +43,30 @@ if [[ -z "${N8N_API_KEY:-}" ]]; then
   exit 1
 fi
 
-if [[ -z "${PAYI_BASE_URL:-}" ]]; then
-  echo "ERROR: PAYI_BASE_URL is not set"
-  echo "  export PAYI_BASE_URL=https://api.yourcompany.pay-i.com"
+if [[ -z "${ASCERTA_BASE_URL:-}" ]]; then
+  echo "ERROR: ASCERTA_BASE_URL is not set"
+  echo "  export ASCERTA_BASE_URL=https://api.yourcompany.ascerta.com"
   exit 1
 fi
 
-# Enforce HTTPS on Pay-i URL
-if [[ ! "${PAYI_BASE_URL}" =~ ^https:// ]]; then
-  echo "ERROR: PAYI_BASE_URL must start with https://"
+# Enforce HTTPS on Ascerta URL
+if [[ ! "${ASCERTA_BASE_URL}" =~ ^https:// ]]; then
+  echo "ERROR: ASCERTA_BASE_URL must start with https://"
   exit 1
 fi
 
 # Strip trailing slash
-PAYI_BASE_URL="${PAYI_BASE_URL%/}"
+ASCERTA_BASE_URL="${ASCERTA_BASE_URL%/}"
 N8N_BASE_URL="${N8N_BASE_URL%/}"
 
-PROXY_URL="${PAYI_BASE_URL}/api/v1/proxy/openai/v1"
+PROXY_URL="${ASCERTA_BASE_URL}/api/v1/proxy/openai/v1"
 
 echo "══════════════════════════════════════════════════════════"
-echo "  Pay-i Migration Script for n8n OpenAI Credentials"
+echo "  Ascerta Migration Script for n8n OpenAI Credentials"
 echo "══════════════════════════════════════════════════════════"
 echo ""
 echo "  n8n instance:    ${N8N_BASE_URL}"
-echo "  Pay-i proxy URL: ${PROXY_URL}"
+echo "  Ascerta proxy URL: ${PROXY_URL}"
 echo ""
 
 # ── Fetch all credentials ────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ if [[ "$CRED_COUNT" == "0" ]]; then
   echo "No OpenAI credentials found in this n8n instance."
   echo ""
   echo "This script only migrates built-in OpenAI credentials."
-  echo "For Anthropic, Azure OpenAI, and AWS Bedrock, use the Pay-i Proxy node."
+  echo "For Anthropic, Azure OpenAI, and AWS Bedrock, use the Ascerta Proxy node."
   exit 0
 fi
 
@@ -169,12 +169,12 @@ echo "════════════════════════�
 echo "  Migration complete!"
 echo "══════════════════════════════════════════════════════════"
 echo ""
-echo "All OpenAI API calls will now route through Pay-i at:"
+echo "All OpenAI API calls will now route through Ascerta at:"
 echo "  ${PROXY_URL}"
 echo ""
-if [[ -z "${PAYI_API_KEY:-}" ]]; then
+if [[ -z "${ASCERTA_API_KEY:-}" ]]; then
   echo "REMINDER: Make sure each workflow also sends the xProxy-api-key header."
-  echo "The Pay-i Proxy node handles this automatically, but for built-in"
+  echo "The Ascerta Proxy node handles this automatically, but for built-in"
   echo "OpenAI nodes you may need to add it via n8n's HTTP header options."
   echo ""
 fi
@@ -182,4 +182,4 @@ echo "To revert, edit each credential in the n8n UI and change the"
 echo "base URL back to: https://api.openai.com/v1"
 echo ""
 echo "For Anthropic, Azure OpenAI, and AWS Bedrock providers,"
-echo "use the Pay-i Proxy node (n8n-nodes-payi) instead."
+echo "use the Ascerta Proxy node (@ascerta/n8n-nodes-ascerta) instead."

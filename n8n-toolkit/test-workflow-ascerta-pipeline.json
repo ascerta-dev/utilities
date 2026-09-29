@@ -1,5 +1,5 @@
 {
-  "name": "Pay-i Provider Pipeline Test",
+  "name": "Ascerta Provider Pipeline Test",
   "nodes": [
     {
       "parameters": {},
@@ -8,7 +8,7 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.1,
       "position": [0, 400],
-      "webhookId": "payi-pipeline-test"
+      "webhookId": "ascerta-pipeline-test"
     },
     {
       "parameters": {
@@ -17,14 +17,14 @@
         "options": {}
       },
       "id": "a1000000-0000-0000-0000-000000000010",
-      "name": "Pay-i OpenAI Model",
-      "type": "n8n-nodes-payi.lmChatPayi",
+      "name": "Ascerta OpenAI Model",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscerta",
       "typeVersion": 1,
       "position": [200, 200],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -51,14 +51,14 @@
         }
       },
       "id": "a1000000-0000-0000-0000-000000000020",
-      "name": "Pay-i Anthropic Model",
-      "type": "n8n-nodes-payi.lmChatPayiAnthropic",
+      "name": "Ascerta Anthropic Model",
+      "type": "@ascerta/n8n-nodes-ascerta.lmChatAscertaAnthropic",
       "typeVersion": 1,
       "position": [600, 200],
       "credentials": {
-        "payiApi": {
+        "ascertaApi": {
           "id": "",
-          "name": "Pay-i API"
+          "name": "Ascerta API"
         }
       }
     },
@@ -111,7 +111,7 @@
         ]
       ]
     },
-    "Pay-i OpenAI Model": {
+    "Ascerta OpenAI Model": {
       "ai_languageModel": [
         [
           {
@@ -133,7 +133,7 @@
         ]
       ]
     },
-    "Pay-i Anthropic Model": {
+    "Ascerta Anthropic Model": {
       "ai_languageModel": [
         [
           {

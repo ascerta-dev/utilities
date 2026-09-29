@@ -19,7 +19,7 @@ git subtree pull --prefix=n8n-toolkit <SOURCE_REPO> <BRANCH> --squash
 Example (local source repo):
 
 ```bash
-git subtree pull --prefix=n8n-toolkit /Users/swharr/src/pay-i-instrumentation/payi-n8n-toolkit codex/AgentExplore --squash
+git subtree pull --prefix=n8n-toolkit <LOCAL_TOOLKIT_REPO> <BRANCH> --squash
 ```
 
 ## Recommended local git identity check
